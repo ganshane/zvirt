@@ -1,0 +1,254 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"checksumSHA1": "kBeNcaKk56FguvPSUCEaH6AxpRc=",
+			"path": "github.com/golang/protobuf/proto",
+			"revision": "8ee79997227bf9b34611aee7946ae64735e6fd93",
+			"revisionTime": "2016-11-17T03:31:26Z"
+		},
+		{
+			"checksumSHA1": "e5Tef+ByBeA19HUaVwaB2ZDV3ik=",
+			"path": "github.com/grpc/grpc-go",
+			"revision": "708a7f9f3283aa2d4f6132d287d78683babe55c8",
+			"revisionTime": "2016-12-02T18:43:27Z",
+			"version": "v1.0.5",
+			"versionExact": "v1.0.5"
+		},
+		{
+			"checksumSHA1": "5CYrIFTTUD3pONFo8uEO21Ajz68=",
+			"path": "github.com/onsi/ginkgo",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "YpuDp4HzlSiuDjenwxBH8SrJUdQ=",
+			"path": "github.com/onsi/ginkgo/config",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "T1cZh3UWr4Hnx6fQYp+7KDNvxG4=",
+			"path": "github.com/onsi/ginkgo/internal/codelocation",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "qvz6/+otRkWa1OHaPMKap9D5Ge4=",
+			"path": "github.com/onsi/ginkgo/internal/containernode",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "882oWW4FC4Nrd8mrMptsDJSTDds=",
+			"path": "github.com/onsi/ginkgo/internal/failer",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "QRyuQm0kZZhoJSZIKQMNBobyHvc=",
+			"path": "github.com/onsi/ginkgo/internal/leafnodes",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "gDC0I+Ramh9TURsSIIJHDx0hnko=",
+			"path": "github.com/onsi/ginkgo/internal/remote",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "bXl467puOFWqYtymMm9oz1FR7dM=",
+			"path": "github.com/onsi/ginkgo/internal/spec",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "yj0801AlFKOgEynOlxgKiWV136E=",
+			"path": "github.com/onsi/ginkgo/internal/specrunner",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "qHyV9V4XDctM1CYOplL703ZIqDg=",
+			"path": "github.com/onsi/ginkgo/internal/suite",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "TUBH2aNaARtAZ5vz51xMFRsOOo0=",
+			"path": "github.com/onsi/ginkgo/internal/testingtproxy",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "BB83CfNg6jFoFNMuXFL+f4EOFpw=",
+			"path": "github.com/onsi/ginkgo/internal/writer",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "U5LK58bWZ2csQRTzIH2kDEgtGnM=",
+			"path": "github.com/onsi/ginkgo/reporters",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "EOEv0WZ8ImDZ1D2+IsvmJSIyTdk=",
+			"path": "github.com/onsi/ginkgo/reporters/stenographer",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "QeB8m9WhRUiL0YKj3n5L0t4mLCg=",
+			"path": "github.com/onsi/ginkgo/reporters/stenographer/support/go-colorable",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "s5EyiKpqSdkyyIUMb226mZc6/Uo=",
+			"path": "github.com/onsi/ginkgo/reporters/stenographer/support/go-isatty",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "x2C2TFYRF/+vpy7KN9Hkjh8VPsE=",
+			"path": "github.com/onsi/ginkgo/types",
+			"revision": "a23f924ce96d61f963fb6219b8ff069d8d768cc2",
+			"revisionTime": "2017-01-02T03:15:22Z"
+		},
+		{
+			"checksumSHA1": "GLT5GJfAoRSaN+hSTpiL0Sx/N80=",
+			"path": "github.com/onsi/gomega",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "GOpl9y71fgQuvzSlzFSkBCFeP/E=",
+			"path": "github.com/onsi/gomega/format",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "H4RBR9kcEWh2lECAzBaOTSvgUuA=",
+			"path": "github.com/onsi/gomega/internal/assertion",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "N7HhJzMN+STfzI315keM9SxFQAE=",
+			"path": "github.com/onsi/gomega/internal/asyncassertion",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "EsgeBqN2S5wj8aWvGsS162ZK7xI=",
+			"path": "github.com/onsi/gomega/internal/oraclematcher",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "G+KJsEQohAtPAHEbhHxRN0pffcA=",
+			"path": "github.com/onsi/gomega/internal/testingtsupport",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "3i0o9Frj5Q6mB8TkX8Gs8SFAPg0=",
+			"path": "github.com/onsi/gomega/matchers",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "gWJfsDHiZTga1esEChd+MfpftN0=",
+			"path": "github.com/onsi/gomega/matchers/support/goraph/bipartitegraph",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "zjTC6ady0bJUwzTFAKtv63T7Fmg=",
+			"path": "github.com/onsi/gomega/matchers/support/goraph/edge",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "o2+IscLOPKOiovl2g0/igkD1R4Q=",
+			"path": "github.com/onsi/gomega/matchers/support/goraph/node",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "yEF1BYQPwS3neYFKiqNQReqnadY=",
+			"path": "github.com/onsi/gomega/matchers/support/goraph/util",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"checksumSHA1": "zEuQ0PUlbqojtNwvu01Mn3DQCJM=",
+			"path": "github.com/onsi/gomega/types",
+			"revision": "e85f63af4302dc0e4277c6008ecf803f1d80e4f0",
+			"revisionTime": "2017-01-14T00:03:05Z"
+		},
+		{
+			"path": "golang.org/x/net/context",
+			"revision": "v1",
+			"version": "v1"
+		},
+		{
+			"path": "golang.org/x/net/http2",
+			"revision": ""
+		},
+		{
+			"path": "golang.org/x/net/trace",
+			"revision": ""
+		},
+		{
+			"path": "golang.org/x/sys/unix",
+			"revision": ""
+		},
+		{
+			"path": "google.golang.org/grpc/codes",
+			"revision": ""
+		},
+		{
+			"path": "google.golang.org/grpc/credentials",
+			"revision": ""
+		},
+		{
+			"path": "google.golang.org/grpc/grpclog",
+			"revision": ""
+		},
+		{
+			"path": "google.golang.org/grpc/internal",
+			"revision": ""
+		},
+		{
+			"path": "google.golang.org/grpc/metadata",
+			"revision": ""
+		},
+		{
+			"path": "google.golang.org/grpc/naming",
+			"revision": ""
+		},
+		{
+			"path": "google.golang.org/grpc/stats",
+			"revision": ""
+		},
+		{
+			"path": "google.golang.org/grpc/tap",
+			"revision": ""
+		},
+		{
+			"path": "google.golang.org/grpc/transport",
+			"revision": ""
+		},
+		{
+			"checksumSHA1": "12GqsW8PiRPnezDDy0v4brZrndM=",
+			"path": "gopkg.in/yaml.v2",
+			"revision": "a5b47d31c556af34a302ce5d659e6fea44d90de0",
+			"revisionTime": "2016-09-28T15:37:09Z"
+		}
+	],
+	"rootPath": "study"
+}
