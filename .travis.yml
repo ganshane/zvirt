@@ -1,14 +1,25 @@
 language: go
+os: linux
+dist: trusty
+sudo: require
+
 go:
   - 1.6.3
   - 1.7.3
+addons:
+  apt:
+    packages:
+    - libvirt
+    - libvirt-dev
 env:
   - GOARCH=amd64
   - GOARCH=386
 sudo: false
 before_install:
+  - sudo apt-get -qqy build-dep libvirt
   - go get -u github.com/kardianos/govendor
 script:
   - govendor sync
+  - go test
 notifications:
   email: false
