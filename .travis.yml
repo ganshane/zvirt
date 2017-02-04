@@ -1,0 +1,14 @@
+language: go
+go:
+  - 1.6.3
+  - 1.7.3
+env:
+  - GOARCH=amd64
+  - GOARCH=386
+sudo: false
+before_install:
+  - go get -u github.com/kardianos/govendor
+script:
+  - govendor sync
+notifications:
+  email: false
