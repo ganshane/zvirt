@@ -7,8 +7,8 @@ import (
 	libvirt "github.com/libvirt/libvirt-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	"zvirt"
-	pb "zvirt/protocol"
+	"github.com/ganshane/zvirt"
+	pb "github.com/ganshane/zvirt/protocol"
 )
 
 const (
@@ -23,7 +23,10 @@ func BuildTestConnection() *libvirt.Connect {
 	return conn
 }
 func main() {
+	//build connection
 	conn:= BuildTestConnection()
+	defer conn.Close()
+
 	server:=zvirt.NewServer(conn)
 	lis, err := net.Listen("tcp", port)
 	if err != nil {

@@ -1,7 +1,7 @@
 package zvirt
 
 import (
-	pb "zvirt/protocol"
+	pb "github.com/ganshane/zvirt/protocol"
 	"golang.org/x/net/context"
 )
 
