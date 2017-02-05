@@ -1,7 +1,6 @@
 language: go
 os: linux
 dist: trusty
-sudo: require
 
 go:
   - 1.6.3
