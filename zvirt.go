@@ -12,6 +12,11 @@ import (
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 	pb "github.com/ganshane/zvirt/protocol"
+	"flag"
+)
+var(
+	uri = flag.String("uri", "test:///default", "libvirtd connection uri")
+	bind = flag.String("bind", ":50051", "zvirt bind string")
 )
 
 //libvirt connection wrapper
@@ -25,11 +30,11 @@ func (conn *libvirtConnWrapper)Close() error  {
 
 //ConnectionMaker for ResourcePool
 type connectionMaker struct{
-	uri string  //global uri
+//	uri string  //global uri
 }
 //new connection
 func (r *connectionMaker) new() (io.Closer, error) {
-	conn, err := libvirt.NewConnect(r.uri)
+	conn, err := libvirt.NewConnect(*uri)
 	if err != nil {
 		return nil,err
 	}
@@ -91,9 +96,9 @@ func (s*ZvirtAgent) close() error {
 	return nil
 }
 //create new server for zvirt
-func NewServer(uri string,bind string) *ZvirtAgent {
+func NewServer() *ZvirtAgent {
 	//resource pool
-	maker := connectionMaker{uri:uri}
+	maker := connectionMaker{}
 	p := rpool.Pool{
 		New:           maker.new,
 		Max:           5,
@@ -101,8 +106,9 @@ func NewServer(uri string,bind string) *ZvirtAgent {
 		IdleTimeout:   time.Hour,
 		ClosePoolSize: 2,
 	}
+	log.Printf("staring zvirt agent for %v@%v ",*uri,*bind)
 	//bind
-	lis, err := net.Listen("tcp", bind)
+	lis, err := net.Listen("tcp", *bind)
 	if err != nil {
 		log.Fatalf("failed to listen: %v", err)
 	}
