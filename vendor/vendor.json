@@ -3,6 +3,24 @@
 	"ignore": "test",
 	"package": [
 		{
+			"checksumSHA1": "imR2wF388/0fBU6RRWx8RvTi8Q8=",
+			"path": "github.com/facebookgo/clock",
+			"revision": "600d898af40aa09a7a93ecb9265d87b0504b6f03",
+			"revisionTime": "2015-04-10T01:09:13Z"
+		},
+		{
+			"checksumSHA1": "tii4jrcqGJQx0aJsyBsUVFMnCYc=",
+			"path": "github.com/facebookgo/rpool",
+			"revision": "f18321c7a66cbed1ca4197bd1b16f7825314c169",
+			"revisionTime": "2015-06-12T18:29:20Z"
+		},
+		{
+			"checksumSHA1": "SzXvrWxavFo8HD/2hnbdu17C3VE=",
+			"path": "github.com/facebookgo/stats",
+			"revision": "1b76add642e42c6ffba7211ad7b3939ce654526e",
+			"revisionTime": "2015-10-06T22:16:25Z"
+		},
+		{
 			"checksumSHA1": "kBeNcaKk56FguvPSUCEaH6AxpRc=",
 			"path": "github.com/golang/protobuf/proto",
 			"revision": "8ee79997227bf9b34611aee7946ae64735e6fd93",
@@ -141,5 +159,5 @@
 			"revisionTime": "2017-01-11T19:10:52Z"
 		}
 	],
-	"rootPath": "zvirt"
+	"rootPath": "github.com/ganshane/zvirt"
 }
