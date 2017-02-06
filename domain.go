@@ -75,6 +75,7 @@ func (zd *ZvirtDomain) Define(ctx context.Context, request *DomainDefineRequest)
 	ensure.Nil(zd.agent, err)
 	defer zd.agent.pool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
+
 	if dom,err :=conn.DomainDefineXML(request.Xml);err == nil{
 		defer dom.Free()
 		if uuid,err:=dom.GetUUIDString(); err == nil {
@@ -86,12 +87,56 @@ func (zd *ZvirtDomain) Define(ctx context.Context, request *DomainDefineRequest)
 		return nil,err
 	}
 }
-func (zd *ZvirtDomain) Start(context.Context, *DomainUUID) (*DomainStateResponse, error){
-	return nil,nil
+func (zd *ZvirtDomain) Start(ctx context.Context, request *DomainUUID) (*DomainStateResponse, error){
+	var err error
+
+	poolConn,err := zd.agent.pool.Acquire()
+	ensure.Nil(zd.agent, err)
+	defer zd.agent.pool.Release(poolConn)
+	conn := poolConn.(*libvirtConnWrapper).conn
+
+	if dom,err := conn.LookupDomainByUUIDString(request.Uuid);err == nil{
+		/*
+		//see https://github.com/libvirt/libvirt/blob/master/tools/virsh-domain.c#L4097
+		if id,_ :=dom.GetID();id != -1 {
+			return nil,errors.New("Domain is already active")
+		}
+		*/
+		flag := libvirt.DOMAIN_NONE
+		if err = dom.CreateWithFlags(flag);err == nil{
+			return &DomainStateResponse{State:DomainState_VIR_DOMAIN_RUNNING},nil
+		}
+	}
+	return nil,err
 }
-func (zd *ZvirtDomain) Stop(context.Context, *DomainUUID) (*DomainStateResponse, error){
-	return nil,nil
+func (zd *ZvirtDomain) Shutdown(ctx context.Context, request *DomainUUID) (*DomainStateResponse, error){
+	var err error
+
+	poolConn,err := zd.agent.pool.Acquire()
+	ensure.Nil(zd.agent, err)
+	defer zd.agent.pool.Release(poolConn)
+	conn := poolConn.(*libvirtConnWrapper).conn
+
+
+	if dom,err := conn.LookupDomainByUUIDString(request.Uuid);err == nil{
+		if err= dom.Shutdown();err == nil{
+			return &DomainStateResponse{State:DomainState_VIR_DOMAIN_SHUTDOWN},nil
+		}
+	}
+	return nil,err
 }
-func (zd *ZvirtDomain) Destroy(context.Context, *DomainUUID) (*DomainStateResponse, error){
-	return nil,nil
+func (zd *ZvirtDomain) Destroy(ctx context.Context, request *DomainUUID) (*DomainStateResponse, error){
+	var err error
+
+	poolConn,err := zd.agent.pool.Acquire()
+	ensure.Nil(zd.agent, err)
+	defer zd.agent.pool.Release(poolConn)
+	conn := poolConn.(*libvirtConnWrapper).conn
+
+	if dom,err := conn.LookupDomainByUUIDString(request.Uuid);err == nil{
+		if err = dom.Destroy();err == nil {
+			return &DomainStateResponse{State:DomainState_VIR_DOMAIN_NOSTATE}, nil
+		}
+	}
+	return nil,err
 }

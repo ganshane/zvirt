@@ -23,6 +23,13 @@ func Test_Define(t *testing.T) {
 
 	ensure.Nil(t,err)
 	ensure.NotNil(t,response.Uuid)
+
+	_,err =zvirt.domain.Start(nil,&pb.DomainUUID{Uuid:response.Uuid})
+	ensure.Nil(t,err)
+	_,err =zvirt.domain.Shutdown(nil,&pb.DomainUUID{Uuid:response.Uuid})
+	ensure.Nil(t,err)
+	_,err =zvirt.domain.Destroy(nil,&pb.DomainUUID{Uuid:response.Uuid})
+	ensure.Nil(t,err)
 }
 
 func Test_Domstate(t *testing.T) {
