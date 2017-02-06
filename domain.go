@@ -7,9 +7,6 @@ import (
 	"github.com/libvirt/libvirt-go"
 	"time"
 )
-type ZvirtDomain struct {
-	agent *ZvirtAgent
-}
 
 //only for test
 func (s*ZvirtAgent) buildTestDomain()(*libvirt.Domain) {
@@ -49,24 +46,27 @@ func (s*ZvirtAgent) buildTransientTestDomain() (*libvirt.Domain) {
 	}
 	return dom
 }
+type ZvirtDomain struct {
+	agent *ZvirtAgent
+}
 // DomState implements zvirt_domain.DomState
-func (s *ZvirtAgent) DomState(contxt context.Context, request *DomStateRequest) (*DomStateResponse, error){
-	conn,err := s.pool.Acquire()
-	ensure.Nil(s, err)
-	defer s.pool.Release(conn)
+func (zd *ZvirtDomain) DomState(contxt context.Context, request *DomStateRequest) (*DomStateResponse, error){
+	poolConn,err := zd.agent.pool.Acquire()
+	ensure.Nil(zd.agent, err)
+	defer zd.agent.pool.Release(poolConn)
+	conn := poolConn.(*libvirtConnWrapper).conn
 
-	libvirtConn := conn.(*libvirtConnWrapper).conn
-	dom,err :=libvirtConn.LookupDomainByUUIDString(request.GetVmUuid())
+	dom,err :=conn.LookupDomainByUUIDString(request.GetVmUuid())
 	if err != nil {
 		return nil, err
-	}else{
+	}else {
 		defer dom.Free()
-		domState,_,err:=dom.GetState()
-		if err!= nil {
+		domState, _, err := dom.GetState()
+		if err != nil {
 			return nil, err
-		}else{
-			response := DomStateResponse{ State: DomainState(domState)}
-			return &response,nil
+		} else {
+			response := DomStateResponse{State: DomainState(domState)}
+			return &response, nil
 		}
 	}
 }

@@ -10,5 +10,5 @@ import (
 func main() {
 	flag.Parse()
 	server:=zvirt.NewServer()
-	server.Start()
+	server.Serve()
 }

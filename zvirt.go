@@ -13,6 +13,7 @@ import (
 	"google.golang.org/grpc/reflection"
 	pb "github.com/ganshane/zvirt/protocol"
 	"flag"
+	"github.com/facebookgo/ensure"
 )
 var(
 	uri = flag.String("uri", "test:///default", "libvirtd connection uri")
@@ -46,20 +47,32 @@ type ZvirtAgent struct {
 	pool *rpool.Pool            //resource pool
 	listener net.Listener       //network binding
 	rpc *grpc.Server            //rpc server instance
+
+	//zd domain
+	domain *ZvirtDomain
 }
 //fatal method
 func(s *ZvirtAgent) Fatal(args ...interface{})()  {
 	log.Fatal(args)
 }
 //start zvirt agent
-func (s*ZvirtAgent) Start() {
+func (agent *ZvirtAgent) initInstance() {
+	//create domain service instance
+	domain := &ZvirtDomain{agent:agent}
+	agent.domain = domain
+	pb.RegisterZvirtDomainServiceServer(agent.rpc, domain)
+
 	//register grpc service
-	pb.RegisterZvirtDomainServiceServer(s.rpc,s)
-	reflection.Register(s.rpc)
+	reflection.Register(agent.rpc)
+
 	//handle system singal
-	go s.handleSignal()
+	go agent.handleSignal()
+}
+func (agent *ZvirtAgent) Serve(){
+	agent.initInstance()
+
 	log.Println("starting rpc server....")
-	if err := s.rpc.Serve(s.listener); err != nil {
+	if err := agent.rpc.Serve(agent.listener); err != nil {
 		log.Println("failed to serve: ", err)
 	} else {
 		log.Printf("success")
@@ -101,6 +114,13 @@ func (s*ZvirtAgent) close() error {
 
 	log.Println("zvirt agent closed")
 	return nil
+}
+func (agent*ZvirtAgent) executeInConnection(callback func(*libvirt.Connect)(interface{},error))(interface{},error){
+	conn,err := agent.pool.Acquire()
+	ensure.Nil(agent, err)
+	defer agent.pool.Release(conn)
+	libvirtConn := conn.(*libvirtConnWrapper).conn
+	return callback(libvirtConn)
 }
 //create new server for zvirt
 func NewServer() *ZvirtAgent {
