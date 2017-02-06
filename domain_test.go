@@ -6,15 +6,15 @@ import (
 	"github.com/facebookgo/ensure"
 )
 
-func Test_DomState(t *testing.T) {
+func Test_Domstate(t *testing.T) {
 	zvirt := newTestInstance()
 	defer zvirt.close()
 	zvirt.initInstance()
 
 
 
-	request :=pb.DomStateRequest{VmUuid:"asdf"}
-	response,err :=zvirt.domain.DomState(nil,&request)
+	request :=pb.DomainUUID{Uuid:"asdf"}
+	response,err :=zvirt.domain.Domstate(nil,&request)
 
 	ensure.NotNil(t,err)
 
@@ -25,8 +25,8 @@ func Test_DomState(t *testing.T) {
 	uuid,err := dom.GetUUIDString()
 	ensure.Nil(t,err)
 
-	request =pb.DomStateRequest{VmUuid:uuid}
-	response,err =zvirt.domain.DomState(nil,&request)
+	request =pb.DomainUUID{Uuid:uuid}
+	response,err =zvirt.domain.Domstate(nil,&request)
 	ensure.DeepEqual(t,response.State,pb.DomainState_VIR_DOMAIN_SHUTOFF)
 
 
@@ -36,8 +36,8 @@ func Test_DomState(t *testing.T) {
 	uuid,err = dom.GetUUIDString()
 	ensure.Nil(t,err)
 
-	request =pb.DomStateRequest{VmUuid:uuid}
-	response,err =zvirt.domain.DomState(nil,&request)
+	request =pb.DomainUUID{Uuid:uuid}
+	response,err =zvirt.domain.Domstate(nil,&request)
 	ensure.DeepEqual(t,response.State,pb.DomainState_VIR_DOMAIN_RUNNING)
 
 }

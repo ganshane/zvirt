@@ -9,8 +9,9 @@ It is generated from these files:
 	zvirt_domain.proto
 
 It has these top-level messages:
-	DomStateRequest
-	DomStateResponse
+	DomainUUID
+	DomainDefineRequest
+	DomainStateResponse
 */
 package protocol
 
@@ -77,33 +78,48 @@ func (x DomainState) String() string {
 }
 func (DomainState) EnumDescriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-// domain stat request
-type DomStateRequest struct {
-	VmUuid string `protobuf:"bytes,1,opt,name=vm_uuid,json=vmUuid" json:"vm_uuid,omitempty"`
+type DomainUUID struct {
+	Uuid string `protobuf:"bytes,1,opt,name=uuid" json:"uuid,omitempty"`
 }
 
-func (m *DomStateRequest) Reset()                    { *m = DomStateRequest{} }
-func (m *DomStateRequest) String() string            { return proto.CompactTextString(m) }
-func (*DomStateRequest) ProtoMessage()               {}
-func (*DomStateRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (m *DomainUUID) Reset()                    { *m = DomainUUID{} }
+func (m *DomainUUID) String() string            { return proto.CompactTextString(m) }
+func (*DomainUUID) ProtoMessage()               {}
+func (*DomainUUID) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-func (m *DomStateRequest) GetVmUuid() string {
+func (m *DomainUUID) GetUuid() string {
 	if m != nil {
-		return m.VmUuid
+		return m.Uuid
 	}
 	return ""
 }
 
-type DomStateResponse struct {
+type DomainDefineRequest struct {
+	Xml string `protobuf:"bytes,1,opt,name=xml" json:"xml,omitempty"`
+}
+
+func (m *DomainDefineRequest) Reset()                    { *m = DomainDefineRequest{} }
+func (m *DomainDefineRequest) String() string            { return proto.CompactTextString(m) }
+func (*DomainDefineRequest) ProtoMessage()               {}
+func (*DomainDefineRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+
+func (m *DomainDefineRequest) GetXml() string {
+	if m != nil {
+		return m.Xml
+	}
+	return ""
+}
+
+type DomainStateResponse struct {
 	State DomainState `protobuf:"varint,1,opt,name=state,enum=protocol.DomainState" json:"state,omitempty"`
 }
 
-func (m *DomStateResponse) Reset()                    { *m = DomStateResponse{} }
-func (m *DomStateResponse) String() string            { return proto.CompactTextString(m) }
-func (*DomStateResponse) ProtoMessage()               {}
-func (*DomStateResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
+func (m *DomainStateResponse) Reset()                    { *m = DomainStateResponse{} }
+func (m *DomainStateResponse) String() string            { return proto.CompactTextString(m) }
+func (*DomainStateResponse) ProtoMessage()               {}
+func (*DomainStateResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
-func (m *DomStateResponse) GetState() DomainState {
+func (m *DomainStateResponse) GetState() DomainState {
 	if m != nil {
 		return m.State
 	}
@@ -111,8 +127,9 @@ func (m *DomStateResponse) GetState() DomainState {
 }
 
 func init() {
-	proto.RegisterType((*DomStateRequest)(nil), "protocol.DomStateRequest")
-	proto.RegisterType((*DomStateResponse)(nil), "protocol.DomStateResponse")
+	proto.RegisterType((*DomainUUID)(nil), "protocol.DomainUUID")
+	proto.RegisterType((*DomainDefineRequest)(nil), "protocol.DomainDefineRequest")
+	proto.RegisterType((*DomainStateResponse)(nil), "protocol.DomainStateResponse")
 	proto.RegisterEnum("protocol.DomainState", DomainState_name, DomainState_value)
 }
 
@@ -127,7 +144,11 @@ const _ = grpc.SupportPackageIsVersion4
 // Client API for ZvirtDomainService service
 
 type ZvirtDomainServiceClient interface {
-	DomState(ctx context.Context, in *DomStateRequest, opts ...grpc.CallOption) (*DomStateResponse, error)
+	Domstate(ctx context.Context, in *DomainUUID, opts ...grpc.CallOption) (*DomainStateResponse, error)
+	Define(ctx context.Context, in *DomainDefineRequest, opts ...grpc.CallOption) (*DomainUUID, error)
+	Start(ctx context.Context, in *DomainUUID, opts ...grpc.CallOption) (*DomainStateResponse, error)
+	Stop(ctx context.Context, in *DomainUUID, opts ...grpc.CallOption) (*DomainStateResponse, error)
+	Destroy(ctx context.Context, in *DomainUUID, opts ...grpc.CallOption) (*DomainStateResponse, error)
 }
 
 type zvirtDomainServiceClient struct {
@@ -138,9 +159,45 @@ func NewZvirtDomainServiceClient(cc *grpc.ClientConn) ZvirtDomainServiceClient {
 	return &zvirtDomainServiceClient{cc}
 }
 
-func (c *zvirtDomainServiceClient) DomState(ctx context.Context, in *DomStateRequest, opts ...grpc.CallOption) (*DomStateResponse, error) {
-	out := new(DomStateResponse)
-	err := grpc.Invoke(ctx, "/protocol.ZvirtDomainService/DomState", in, out, c.cc, opts...)
+func (c *zvirtDomainServiceClient) Domstate(ctx context.Context, in *DomainUUID, opts ...grpc.CallOption) (*DomainStateResponse, error) {
+	out := new(DomainStateResponse)
+	err := grpc.Invoke(ctx, "/protocol.ZvirtDomainService/domstate", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *zvirtDomainServiceClient) Define(ctx context.Context, in *DomainDefineRequest, opts ...grpc.CallOption) (*DomainUUID, error) {
+	out := new(DomainUUID)
+	err := grpc.Invoke(ctx, "/protocol.ZvirtDomainService/define", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *zvirtDomainServiceClient) Start(ctx context.Context, in *DomainUUID, opts ...grpc.CallOption) (*DomainStateResponse, error) {
+	out := new(DomainStateResponse)
+	err := grpc.Invoke(ctx, "/protocol.ZvirtDomainService/start", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *zvirtDomainServiceClient) Stop(ctx context.Context, in *DomainUUID, opts ...grpc.CallOption) (*DomainStateResponse, error) {
+	out := new(DomainStateResponse)
+	err := grpc.Invoke(ctx, "/protocol.ZvirtDomainService/stop", in, out, c.cc, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *zvirtDomainServiceClient) Destroy(ctx context.Context, in *DomainUUID, opts ...grpc.CallOption) (*DomainStateResponse, error) {
+	out := new(DomainStateResponse)
+	err := grpc.Invoke(ctx, "/protocol.ZvirtDomainService/destroy", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -150,27 +207,103 @@ func (c *zvirtDomainServiceClient) DomState(ctx context.Context, in *DomStateReq
 // Server API for ZvirtDomainService service
 
 type ZvirtDomainServiceServer interface {
-	DomState(context.Context, *DomStateRequest) (*DomStateResponse, error)
+	Domstate(context.Context, *DomainUUID) (*DomainStateResponse, error)
+	Define(context.Context, *DomainDefineRequest) (*DomainUUID, error)
+	Start(context.Context, *DomainUUID) (*DomainStateResponse, error)
+	Stop(context.Context, *DomainUUID) (*DomainStateResponse, error)
+	Destroy(context.Context, *DomainUUID) (*DomainStateResponse, error)
 }
 
 func RegisterZvirtDomainServiceServer(s *grpc.Server, srv ZvirtDomainServiceServer) {
 	s.RegisterService(&_ZvirtDomainService_serviceDesc, srv)
 }
 
-func _ZvirtDomainService_DomState_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(DomStateRequest)
+func _ZvirtDomainService_Domstate_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DomainUUID)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ZvirtDomainServiceServer).DomState(ctx, in)
+		return srv.(ZvirtDomainServiceServer).Domstate(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/protocol.ZvirtDomainService/DomState",
+		FullMethod: "/protocol.ZvirtDomainService/Domstate",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ZvirtDomainServiceServer).DomState(ctx, req.(*DomStateRequest))
+		return srv.(ZvirtDomainServiceServer).Domstate(ctx, req.(*DomainUUID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ZvirtDomainService_Define_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DomainDefineRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ZvirtDomainServiceServer).Define(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protocol.ZvirtDomainService/Define",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ZvirtDomainServiceServer).Define(ctx, req.(*DomainDefineRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ZvirtDomainService_Start_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DomainUUID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ZvirtDomainServiceServer).Start(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protocol.ZvirtDomainService/Start",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ZvirtDomainServiceServer).Start(ctx, req.(*DomainUUID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ZvirtDomainService_Stop_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DomainUUID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ZvirtDomainServiceServer).Stop(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protocol.ZvirtDomainService/Stop",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ZvirtDomainServiceServer).Stop(ctx, req.(*DomainUUID))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _ZvirtDomainService_Destroy_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(DomainUUID)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(ZvirtDomainServiceServer).Destroy(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/protocol.ZvirtDomainService/Destroy",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(ZvirtDomainServiceServer).Destroy(ctx, req.(*DomainUUID))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -180,8 +313,24 @@ var _ZvirtDomainService_serviceDesc = grpc.ServiceDesc{
 	HandlerType: (*ZvirtDomainServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
-			MethodName: "DomState",
-			Handler:    _ZvirtDomainService_DomState_Handler,
+			MethodName: "domstate",
+			Handler:    _ZvirtDomainService_Domstate_Handler,
+		},
+		{
+			MethodName: "define",
+			Handler:    _ZvirtDomainService_Define_Handler,
+		},
+		{
+			MethodName: "start",
+			Handler:    _ZvirtDomainService_Start_Handler,
+		},
+		{
+			MethodName: "stop",
+			Handler:    _ZvirtDomainService_Stop_Handler,
+		},
+		{
+			MethodName: "destroy",
+			Handler:    _ZvirtDomainService_Destroy_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -191,25 +340,29 @@ var _ZvirtDomainService_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("zvirt_domain.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 315 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x6c, 0x91, 0xcd, 0x4e, 0xf2, 0x40,
-	0x14, 0x86, 0xe9, 0xf7, 0xc9, 0x8f, 0xc7, 0x04, 0xc6, 0x43, 0x00, 0x65, 0x65, 0x88, 0x0b, 0x83,
-	0x09, 0x0b, 0xbc, 0x00, 0x53, 0x98, 0x41, 0x88, 0x30, 0x6d, 0x3a, 0xad, 0x46, 0x37, 0x0d, 0xc2,
-	0x2c, 0x9a, 0x58, 0x06, 0xe9, 0xcf, 0xc2, 0x0b, 0xf6, 0x3a, 0x4c, 0x8b, 0xe8, 0xd8, 0xb8, 0x6a,
-	0xf2, 0xbc, 0x6f, 0xde, 0x93, 0x3e, 0x03, 0xf8, 0x9e, 0x06, 0xbb, 0xd8, 0x5f, 0xab, 0x70, 0x19,
-	0x6c, 0x06, 0xdb, 0x9d, 0x8a, 0x15, 0xd6, 0xf2, 0xcf, 0x4a, 0xbd, 0xf6, 0xfa, 0xd0, 0xa0, 0x2a,
-	0x14, 0xf1, 0x32, 0x96, 0x8e, 0x7c, 0x4b, 0x64, 0x14, 0x63, 0x07, 0xaa, 0x69, 0xe8, 0x27, 0x49,
-	0xb0, 0x3e, 0x33, 0x2e, 0x8c, 0xab, 0x63, 0xa7, 0x92, 0x86, 0x5e, 0x12, 0xac, 0x7b, 0xb7, 0x40,
-	0x7e, 0xba, 0xd1, 0x56, 0x6d, 0x22, 0x89, 0xd7, 0x50, 0x8e, 0x32, 0x90, 0x57, 0xeb, 0xc3, 0xd6,
-	0xe0, 0xb0, 0x3c, 0xa0, 0xf9, 0xc1, 0x7d, 0x7b, 0xdf, 0xe9, 0x7f, 0x18, 0x70, 0xa2, 0x61, 0x6c,
-	0x03, 0x3e, 0xcc, 0x1c, 0x9f, 0x5a, 0x0b, 0x73, 0xc6, 0x7d, 0x6e, 0x09, 0xd7, 0x74, 0x19, 0x29,
-	0x15, 0xb8, 0xe3, 0x71, 0x3e, 0xe3, 0x77, 0xc4, 0x28, 0xf0, 0xd1, 0xdc, 0x1a, 0xdf, 0x33, 0x4a,
-	0xfe, 0x61, 0x0b, 0x4e, 0x35, 0x6e, 0x9b, 0x9e, 0x60, 0x94, 0xfc, 0xc7, 0x0e, 0x34, 0x35, 0x2c,
-	0xa6, 0x9e, 0x4b, 0xad, 0x47, 0x4e, 0x8e, 0x0a, 0x3b, 0x59, 0x60, 0x4d, 0x26, 0xa4, 0x5c, 0xe0,
-	0x63, 0xc7, 0x14, 0x53, 0x46, 0x49, 0x05, 0xbb, 0xd0, 0xd6, 0xf7, 0x17, 0xc2, 0x13, 0x36, 0xe3,
-	0x94, 0x51, 0x52, 0xc5, 0x26, 0x34, 0xb4, 0x6c, 0x6e, 0x0a, 0x97, 0xd4, 0x86, 0x4f, 0x80, 0xcf,
-	0x99, 0xf5, 0xaf, 0x9f, 0x95, 0xbb, 0x34, 0x58, 0x49, 0x1c, 0x43, 0xed, 0xe0, 0x0f, 0xcf, 0x7f,
-	0x89, 0xd2, 0xfd, 0x77, 0xbb, 0x7f, 0x45, 0x7b, 0xdd, 0xbd, 0xd2, 0xe8, 0x12, 0xea, 0xf9, 0x83,
-	0x7e, 0x97, 0x46, 0x44, 0x3b, 0x65, 0x67, 0xd0, 0x36, 0x5e, 0x2a, 0x79, 0x7a, 0xf3, 0x19, 0x00,
-	0x00, 0xff, 0xff, 0x37, 0xfc, 0x49, 0xba, 0xfd, 0x01, 0x00, 0x00,
+	// 380 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x09, 0x6e, 0x88, 0x02, 0xff, 0x9c, 0x92, 0x5d, 0x8b, 0xda, 0x40,
+	0x14, 0x86, 0x8d, 0xdf, 0x3d, 0x05, 0x3b, 0x3d, 0x56, 0x5b, 0x84, 0x82, 0x84, 0x42, 0x4b, 0x0b,
+	0x5e, 0xd8, 0xeb, 0x7e, 0x24, 0x4e, 0xac, 0xa1, 0x9a, 0x84, 0x4c, 0xd2, 0x42, 0x6f, 0xc4, 0x9a,
+	0x29, 0x04, 0xd4, 0xb1, 0xc9, 0x28, 0xbb, 0xfb, 0x4f, 0xf7, 0x0f, 0xec, 0xef, 0x58, 0x32, 0xea,
+	0x92, 0xcd, 0x7a, 0xe5, 0x55, 0x86, 0xe7, 0x3c, 0x39, 0x49, 0xde, 0x37, 0x80, 0x37, 0xfb, 0x38,
+	0x91, 0xf3, 0x48, 0xac, 0x17, 0xf1, 0x66, 0xb0, 0x4d, 0x84, 0x14, 0xd8, 0x54, 0x97, 0xa5, 0x58,
+	0xe9, 0x7d, 0x00, 0xaa, 0x26, 0x61, 0x68, 0x53, 0x44, 0xa8, 0xee, 0x76, 0x71, 0xf4, 0x46, 0xeb,
+	0x6b, 0x1f, 0x9e, 0xf9, 0xea, 0xac, 0xbf, 0x87, 0xf6, 0xc1, 0xa0, 0xfc, 0x5f, 0xbc, 0xe1, 0x3e,
+	0xff, 0xbf, 0xe3, 0xa9, 0x44, 0x02, 0x95, 0xab, 0xf5, 0xea, 0x68, 0x66, 0x47, 0xdd, 0x3c, 0x89,
+	0x4c, 0x2e, 0x24, 0xf7, 0x79, 0xba, 0x15, 0x9b, 0x94, 0xe3, 0x27, 0xa8, 0xa5, 0x19, 0x50, 0x6a,
+	0x6b, 0xd8, 0x19, 0x9c, 0x9e, 0x3d, 0xc8, 0xdb, 0x07, 0xe7, 0xe3, 0x9d, 0x06, 0xcf, 0x73, 0x18,
+	0xbb, 0x80, 0xbf, 0x6c, 0x7f, 0x4e, 0xdd, 0x99, 0x61, 0x3b, 0x73, 0xc7, 0x65, 0x81, 0x11, 0x58,
+	0xa4, 0x54, 0xe0, 0x7e, 0xe8, 0x38, 0xb6, 0xf3, 0x83, 0x68, 0x05, 0x6e, 0x4e, 0xdd, 0xd1, 0x4f,
+	0x8b, 0x92, 0x32, 0x76, 0xe0, 0x65, 0x8e, 0x7b, 0x46, 0xc8, 0x2c, 0x4a, 0x2a, 0xf8, 0x1a, 0xda,
+	0x39, 0xcc, 0x26, 0x61, 0x40, 0xdd, 0xdf, 0x0e, 0xa9, 0x16, 0xf6, 0x64, 0x03, 0x77, 0x3c, 0x26,
+	0xb5, 0x02, 0x1f, 0xf9, 0x06, 0x9b, 0x58, 0x94, 0xd4, 0xb1, 0x07, 0xdd, 0xfc, 0xfe, 0x19, 0x0b,
+	0x99, 0x67, 0x39, 0xd4, 0xa2, 0xa4, 0x81, 0x6d, 0x78, 0x91, 0x9b, 0x4d, 0x0d, 0x16, 0x90, 0xe6,
+	0xf0, 0xb6, 0x0c, 0xf8, 0x27, 0x2b, 0xe6, 0xf8, 0xb5, 0x3c, 0xd9, 0xc7, 0x4b, 0x8e, 0x06, 0x34,
+	0x23, 0xb1, 0x56, 0x59, 0xe0, 0xab, 0x62, 0x52, 0x59, 0x45, 0xbd, 0xb7, 0xe7, 0xf3, 0x3b, 0xa6,
+	0xad, 0x97, 0xf0, 0x1b, 0xd4, 0x23, 0xd5, 0x14, 0x3e, 0x51, 0x1f, 0x35, 0xd8, 0x3b, 0xbb, 0x5f,
+	0x2f, 0xe1, 0x57, 0x55, 0x58, 0x22, 0x2f, 0x7d, 0x81, 0x2f, 0x50, 0x4d, 0xa5, 0xd8, 0x5e, 0x7a,
+	0xfb, 0x77, 0x68, 0x44, 0x3c, 0x95, 0x89, 0xb8, 0xbe, 0x70, 0x83, 0xf9, 0x0e, 0x5a, 0xea, 0x9f,
+	0x7f, 0xf0, 0x4c, 0x92, 0x8b, 0xda, 0xcb, 0xa0, 0xa7, 0xfd, 0xad, 0xab, 0xe9, 0xe7, 0xfb, 0x00,
+	0x00, 0x00, 0xff, 0xff, 0x19, 0xbd, 0xaf, 0x5c, 0x20, 0x03, 0x00, 0x00,
 }

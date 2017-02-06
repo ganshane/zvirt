@@ -50,13 +50,13 @@ type ZvirtDomain struct {
 	agent *ZvirtAgent
 }
 // DomState implements zvirt_domain.DomState
-func (zd *ZvirtDomain) DomState(contxt context.Context, request *DomStateRequest) (*DomStateResponse, error){
+func (zd *ZvirtDomain) Domstate(contxt context.Context, request *DomainUUID) (*DomainStateResponse, error){
 	poolConn,err := zd.agent.pool.Acquire()
 	ensure.Nil(zd.agent, err)
 	defer zd.agent.pool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	dom,err :=conn.LookupDomainByUUIDString(request.GetVmUuid())
+	dom,err :=conn.LookupDomainByUUIDString(request.GetUuid())
 	if err != nil {
 		return nil, err
 	}else {
@@ -65,22 +65,20 @@ func (zd *ZvirtDomain) DomState(contxt context.Context, request *DomStateRequest
 		if err != nil {
 			return nil, err
 		} else {
-			response := DomStateResponse{State: DomainState(domState)}
+			response := DomainStateResponse{State: DomainState(domState)}
 			return &response, nil
 		}
 	}
 }
-/*
-func (agent *ZvirtAgent) Define(context.Context, *DomainDefineRequest) (*DomainUUID, error){
+func (zd *ZvirtDomain) Define(context.Context, *DomainDefineRequest) (*DomainUUID, error){
 	return nil,nil
 }
-func (agent *ZvirtAgent) Start(context.Context, *DomainUUID) (*DomainStateResponse, error){
+func (zd *ZvirtDomain) Start(context.Context, *DomainUUID) (*DomainStateResponse, error){
 	return nil,nil
 }
-func (agent *ZvirtAgent) Stop(context.Context, *DomainUUID) (*DomainStateResponse, error){
+func (zd *ZvirtDomain) Stop(context.Context, *DomainUUID) (*DomainStateResponse, error){
 	return nil,nil
 }
-func (agent *ZvirtAgent) Destroy(context.Context, *DomainUUID) (*DomainStateResponse, error){
+func (zd *ZvirtDomain) Destroy(context.Context, *DomainUUID) (*DomainStateResponse, error){
 	return nil,nil
 }
-*/
