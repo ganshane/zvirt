@@ -87,11 +87,18 @@ func (s*ZvirtAgent) handleSignal(){
 //close zvirt agent
 func (s*ZvirtAgent) close() error {
 	log.Println("closing zvirt agent")
+
 	log.Println("closing rpc server")
 	s.rpc.GracefulStop()
-	log.Println("closing net listener")
-	s.listener.Close()
+
+	if(s.listener != nil) {
+		log.Println("closing net listener")
+		s.listener.Close()
+	}
+
 	log.Println("closing pool")
+	s.pool.Close()
+
 	log.Println("zvirt agent closed")
 	return nil
 }
@@ -115,4 +122,19 @@ func NewServer() *ZvirtAgent {
 	//new rpc server
 	s := grpc.NewServer()
 	return &ZvirtAgent{pool:&p,listener:lis,rpc:s}
+}
+//only for test
+func newTestInstance() *ZvirtAgent {
+	//resource pool
+	maker := connectionMaker{}
+	p := rpool.Pool{
+		New:           maker.new,
+		Max:           5,
+		MinIdle:       1,
+		IdleTimeout:   time.Hour,
+		ClosePoolSize: 2,
+	}
+	//new rpc server
+	s := grpc.NewServer()
+	return &ZvirtAgent{pool:&p,listener:nil,rpc:s}
 }
