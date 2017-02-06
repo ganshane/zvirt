@@ -70,8 +70,21 @@ func (zd *ZvirtDomain) Domstate(contxt context.Context, request *DomainUUID) (*D
 		}
 	}
 }
-func (zd *ZvirtDomain) Define(context.Context, *DomainDefineRequest) (*DomainUUID, error){
-	return nil,nil
+func (zd *ZvirtDomain) Define(ctx context.Context, request *DomainDefineRequest) (*DomainUUID, error){
+	poolConn,err := zd.agent.pool.Acquire()
+	ensure.Nil(zd.agent, err)
+	defer zd.agent.pool.Release(poolConn)
+	conn := poolConn.(*libvirtConnWrapper).conn
+	if dom,err :=conn.DomainDefineXML(request.Xml);err == nil{
+		defer dom.Free()
+		if uuid,err:=dom.GetUUIDString(); err == nil {
+			return &DomainUUID{Uuid:uuid},nil
+		}else{
+			return nil,err
+		}
+	}else{
+		return nil,err
+	}
 }
 func (zd *ZvirtDomain) Start(context.Context, *DomainUUID) (*DomainStateResponse, error){
 	return nil,nil

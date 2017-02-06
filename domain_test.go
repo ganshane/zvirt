@@ -4,7 +4,26 @@ import (
 	"testing"
 	pb "github.com/ganshane/zvirt/protocol"
 	"github.com/facebookgo/ensure"
+	"time"
 )
+func Test_Define(t *testing.T) {
+	zvirt := newTestInstance()
+	defer zvirt.close()
+	zvirt.initInstance()
+
+	request := pb.DomainDefineRequest{Xml:`
+	<domain type="test">
+		<name>` + time.Now().String() + `</name>
+		<memory unit="KiB">8192</memory>
+		<os>
+			<type>hvm</type>
+		</os>
+	</domain>`}
+	response,err :=zvirt.domain.Define(nil,&request)
+
+	ensure.Nil(t,err)
+	ensure.NotNil(t,response.Uuid)
+}
 
 func Test_Domstate(t *testing.T) {
 	zvirt := newTestInstance()
