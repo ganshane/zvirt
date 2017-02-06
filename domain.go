@@ -53,7 +53,7 @@ func (s *ZvirtAgent) DomState(contxt context.Context, request *pb.DomStateReques
 	defer s.pool.Release(conn)
 
 	libvirtConn := conn.(*libvirtConnWrapper).conn
-	dom,err :=libvirtConn.LookupDomainByUUIDString(request.GetVmId())
+	dom,err :=libvirtConn.LookupDomainByUUIDString(request.GetVmUuid())
 	if err != nil {
 		return nil, err
 	}else{

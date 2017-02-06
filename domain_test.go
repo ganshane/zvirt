@@ -11,7 +11,7 @@ func Test_DomState(t *testing.T) {
 	defer zvirt.close()
 
 
-	request :=pb.DomStateRequest{VmId:"asdf"}
+	request :=pb.DomStateRequest{VmUuid:"asdf"}
 	response,err :=zvirt.DomState(nil,&request)
 
 	ensure.NotNil(t,err)
@@ -22,7 +22,7 @@ func Test_DomState(t *testing.T) {
 	uuid,err := dom.GetUUIDString()
 	ensure.Nil(t,err)
 
-	request =pb.DomStateRequest{VmId:uuid}
+	request =pb.DomStateRequest{VmUuid:uuid}
 	response,err =zvirt.DomState(nil,&request)
 	ensure.DeepEqual(t,response.State,pb.DomainState_VIR_DOMAIN_SHUTOFF)
 
@@ -33,7 +33,7 @@ func Test_DomState(t *testing.T) {
 	uuid,err = dom.GetUUIDString()
 	ensure.Nil(t,err)
 
-	request =pb.DomStateRequest{VmId:uuid}
+	request =pb.DomStateRequest{VmUuid:uuid}
 	response,err =zvirt.DomState(nil,&request)
 	ensure.DeepEqual(t,response.State,pb.DomainState_VIR_DOMAIN_RUNNING)
 
