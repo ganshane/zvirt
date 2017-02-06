@@ -19,6 +19,7 @@ func Test_DomState(t *testing.T) {
 	dom := zvirt.buildTestDomain()
 	defer dom.Destroy()
 
+
 	uuid,err := dom.GetUUIDString()
 	ensure.Nil(t,err)
 

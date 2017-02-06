@@ -1,12 +1,15 @@
 package zvirt
 
 import (
-	pb "github.com/ganshane/zvirt/protocol"
+	. "github.com/ganshane/zvirt/protocol"
 	"golang.org/x/net/context"
 	"github.com/facebookgo/ensure"
 	"github.com/libvirt/libvirt-go"
 	"time"
 )
+type ZvirtDomain struct {
+	agent *ZvirtAgent
+}
 
 //only for test
 func (s*ZvirtAgent) buildTestDomain()(*libvirt.Domain) {
@@ -47,7 +50,7 @@ func (s*ZvirtAgent) buildTransientTestDomain() (*libvirt.Domain) {
 	return dom
 }
 // DomState implements zvirt_domain.DomState
-func (s *ZvirtAgent) DomState(contxt context.Context, request *pb.DomStateRequest) (*pb.DomStateResponse, error){
+func (s *ZvirtAgent) DomState(contxt context.Context, request *DomStateRequest) (*DomStateResponse, error){
 	conn,err := s.pool.Acquire()
 	ensure.Nil(s, err)
 	defer s.pool.Release(conn)
@@ -62,10 +65,22 @@ func (s *ZvirtAgent) DomState(contxt context.Context, request *pb.DomStateReques
 		if err!= nil {
 			return nil, err
 		}else{
-			response := pb.DomStateResponse{
-				State: pb.DomainState(domState),
-			}
+			response := DomStateResponse{ State: DomainState(domState)}
 			return &response,nil
 		}
 	}
 }
+/*
+func (agent *ZvirtAgent) Define(context.Context, *DomainDefineRequest) (*DomainUUID, error){
+	return nil,nil
+}
+func (agent *ZvirtAgent) Start(context.Context, *DomainUUID) (*DomainStateResponse, error){
+	return nil,nil
+}
+func (agent *ZvirtAgent) Stop(context.Context, *DomainUUID) (*DomainStateResponse, error){
+	return nil,nil
+}
+func (agent *ZvirtAgent) Destroy(context.Context, *DomainUUID) (*DomainStateResponse, error){
+	return nil,nil
+}
+*/
