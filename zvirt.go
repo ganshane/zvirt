@@ -29,12 +29,8 @@ func (conn *libvirtConnWrapper)Close() error  {
 	return e;
 }
 
-//ConnectionMaker for ResourcePool
-type connectionMaker struct{
-//	uri string  //global uri
-}
 //new connection
-func (r *connectionMaker) new() (io.Closer, error) {
+func  newConnection() (io.Closer, error) {
 	conn, err := libvirt.NewConnect(*uri)
 	if err != nil {
 		return nil,err
@@ -74,8 +70,6 @@ func (agent *ZvirtAgent) Serve(){
 	log.Println("starting rpc server....")
 	if err := agent.rpc.Serve(agent.listener); err != nil {
 		log.Println("failed to serve: ", err)
-	} else {
-		log.Printf("success")
 	}
 }
 func (s*ZvirtAgent) handleSignal(){
@@ -125,15 +119,14 @@ func (agent*ZvirtAgent) executeInConnection(callback func(*libvirt.Connect)(inte
 //create new server for zvirt
 func NewServer() *ZvirtAgent {
 	//resource pool
-	maker := connectionMaker{}
 	p := rpool.Pool{
-		New:           maker.new,
+		New:           newConnection,
 		Max:           5,
 		MinIdle:       1,
 		IdleTimeout:   time.Hour,
 		ClosePoolSize: 2,
 	}
-	log.Printf("staring zvirt agent for %v@%v ",*uri,*bind)
+	log.Printf("starting zvirt agent for %v@%v ",*uri,*bind)
 	//bind
 	lis, err := net.Listen("tcp", *bind)
 	if err != nil {
@@ -146,9 +139,8 @@ func NewServer() *ZvirtAgent {
 //only for test
 func newTestInstance() *ZvirtAgent {
 	//resource pool
-	maker := connectionMaker{}
 	p := rpool.Pool{
-		New:           maker.new,
+		New:           newConnection,
 		Max:           5,
 		MinIdle:       1,
 		IdleTimeout:   time.Hour,
