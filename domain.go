@@ -89,7 +89,6 @@ func (zd *ZvirtDomain) Define(ctx context.Context, request *DomainDefineRequest)
 }
 func (zd *ZvirtDomain) Start(ctx context.Context, request *DomainUUID) (*DomainStateResponse, error){
 	var err error
-
 	poolConn,err := zd.agent.pool.Acquire()
 	ensure.Nil(zd.agent, err)
 	defer zd.agent.pool.Release(poolConn)

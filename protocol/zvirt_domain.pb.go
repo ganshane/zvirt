@@ -7,11 +7,15 @@ Package protocol is a generated protocol buffer package.
 
 It is generated from these files:
 	zvirt_domain.proto
+	zvirt_pool.proto
 
 It has these top-level messages:
 	DomainUUID
 	DomainDefineRequest
 	DomainStateResponse
+	PoolUUID
+	PoolDefineRequest
+	PoolStateResponse
 */
 package protocol
 

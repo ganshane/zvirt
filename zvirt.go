@@ -46,6 +46,7 @@ type ZvirtAgent struct {
 
 	//zd domain
 	domain *ZvirtDomain
+	zpool *ZvirtPool
 }
 //fatal method
 func(s *ZvirtAgent) Fatal(args ...interface{})()  {
@@ -57,6 +58,10 @@ func (agent *ZvirtAgent) initInstance() {
 	domain := &ZvirtDomain{agent:agent}
 	agent.domain = domain
 	pb.RegisterZvirtDomainServiceServer(agent.rpc, domain)
+
+	pool := &ZvirtPool{agent:agent}
+	agent.zpool = pool
+	pb.RegisterZvirtPoolServiceServer(agent.rpc,pool)
 
 	//register grpc service
 	reflection.Register(agent.rpc)
