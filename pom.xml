@@ -54,13 +54,13 @@
         <artifactId>maven-assembly-plugin</artifactId>
         <executions>
           <execution>
-            <id>web</id>
+            <id>binary</id>
             <phase>package</phase>
             <goals>
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>zvirt-agent-${project.version}-${os.detected.classifier}</finalName>
+              <finalName>zvirt-agent-${project.version}</finalName>
               <descriptors>
                 <descriptor>support/bin-agent.xml</descriptor>
               </descriptors>
