@@ -32,9 +32,11 @@ func (zpool *ZvirtPool) Info(ctx context.Context, uuid *PoolUUID) (*PoolStateRes
 	defer zpool.agent.pool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	if pool,err :=conn.LookupStoragePoolByUUIDString(uuid.Uuid);err == nil{
+	pool,err :=conn.LookupStoragePoolByUUIDString(uuid.Uuid)
+	if err == nil{
 		defer pool.Free()
-		if info,err:=pool.GetInfo(); err == nil {
+		info,err:=pool.GetInfo()
+		if err == nil {
 			return &PoolStateResponse{State:PoolState(info.State)},nil
 		}
 	}
@@ -49,7 +51,8 @@ func (zpool *ZvirtPool) Start(ctx context.Context, poolUUID *PoolUUID) (*PoolSta
 	pool,err :=conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
 	if err == nil{
 		defer pool.Free()
-		if err:=pool.Create(libvirt.STORAGE_POOL_CREATE_NORMAL); err == nil {
+		err:=pool.Create(libvirt.STORAGE_POOL_CREATE_NORMAL)
+	  if err == nil {
 			return &PoolStateResponse{State:PoolState_STORAGE_POOL_RUNNING},nil
 		}
 	}
