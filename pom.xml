@@ -42,6 +42,13 @@
         <directory>src/test/resources</directory>
       </testResource>
     </testResources>
+    <extensions>
+      <extension>
+        <groupId>kr.motd.maven</groupId>
+        <artifactId>os-maven-plugin</artifactId>
+        <version>1.4.1.Final</version>
+      </extension>
+    </extensions>
     <plugins>
       <plugin>
         <artifactId>maven-assembly-plugin</artifactId>
@@ -53,7 +60,7 @@
               <goal>single</goal>
             </goals>
             <configuration>
-              <finalName>zvirt-agent-${project.version}</finalName>
+              <finalName>zvirt-agent-${project.version}-${os.detected.classifier}</finalName>
               <descriptors>
                 <descriptor>support/bin-agent.xml</descriptor>
               </descriptors>
