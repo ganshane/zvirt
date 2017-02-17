@@ -64,7 +64,8 @@ func (zd *Domain) Domstate(contxt context.Context, request *pb.DomainUUID) (*pb.
 	dom, err := conn.LookupDomainByUUIDString(request.GetUuid())
 	if err == nil {
 		defer dom.Free()
-		if domState, _, err := dom.GetState(); err == nil {
+		domState, _, err := dom.GetState()
+		if err == nil {
 			response := pb.DomainStateResponse{State: pb.DomainState(domState)}
 			return &response, nil
 		}
@@ -82,7 +83,8 @@ func (zd *Domain) Define(ctx context.Context, request *pb.DomainDefineRequest) (
 	dom, err := conn.DomainDefineXML(request.Xml)
 	if err == nil {
 		defer dom.Free()
-		if uuid, err := dom.GetUUIDString(); err == nil {
+		uuid, err := dom.GetUUIDString()
+		if err == nil {
 			return &pb.DomainUUID{Uuid: uuid}, nil
 		}
 	}
@@ -98,6 +100,7 @@ func (zd *Domain) Start(ctx context.Context, request *pb.DomainUUID) (*pb.Domain
 
 	dom, err := conn.LookupDomainByUUIDString(request.Uuid)
 	if err == nil {
+		defer dom.Free()
 		/*
 			//see https://github.com/libvirt/libvirt/blob/master/tools/virsh-domain.c#L4097
 			if id,_ :=dom.GetID();id != -1 {
@@ -105,7 +108,8 @@ func (zd *Domain) Start(ctx context.Context, request *pb.DomainUUID) (*pb.Domain
 			}
 		*/
 		flag := libvirt.DOMAIN_NONE
-		if err = dom.CreateWithFlags(flag); err == nil {
+		err = dom.CreateWithFlags(flag)
+		if err == nil {
 			return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_RUNNING}, nil
 		}
 	}
@@ -114,7 +118,6 @@ func (zd *Domain) Start(ctx context.Context, request *pb.DomainUUID) (*pb.Domain
 
 //Shutdown - gracefully shutdown a domain
 func (zd *Domain) Shutdown(ctx context.Context, request *pb.DomainUUID) (*pb.DomainStateResponse, error) {
-
 	poolConn, err := zd.agent.connectionPool.Acquire()
 	ensure.Nil(zd.agent, err)
 	defer zd.agent.connectionPool.Release(poolConn)
@@ -122,7 +125,9 @@ func (zd *Domain) Shutdown(ctx context.Context, request *pb.DomainUUID) (*pb.Dom
 
 	dom, err := conn.LookupDomainByUUIDString(request.Uuid)
 	if err == nil {
-		if err = dom.Shutdown(); err == nil {
+		defer dom.Free()
+		err = dom.Shutdown();
+		if err == nil {
 			return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_SHUTDOWN}, nil
 		}
 	}
@@ -138,7 +143,9 @@ func (zd *Domain) Destroy(ctx context.Context, request *pb.DomainUUID) (*pb.Doma
 
 	dom, err := conn.LookupDomainByUUIDString(request.Uuid)
 	if err == nil {
-		if err = dom.Destroy(); err == nil {
+		//dom.Free()
+		err = dom.Destroy()
+		if err == nil {
 			return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_NOSTATE}, nil
 		}
 	}

@@ -22,7 +22,8 @@ func (zpool *Pool) Define(ctx context.Context, request *pb.PoolDefineRequest) (*
 	pool, err := conn.StoragePoolDefineXML(request.Xml, 0)
 	if err == nil {
 		defer pool.Free()
-		if uuid, err := pool.GetUUIDString(); err == nil {
+		uuid, err := pool.GetUUIDString()
+		if err == nil {
 			return &pb.PoolUUID{Uuid: uuid}, nil
 		}
 	}
@@ -57,7 +58,7 @@ func (zpool *Pool) Start(ctx context.Context, poolUUID *pb.PoolUUID) (*pb.PoolSt
 	pool, err := conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
 	if err == nil {
 		defer pool.Free()
-		err := pool.Create(libvirt.STORAGE_POOL_CREATE_NORMAL)
+		err = pool.Create(libvirt.STORAGE_POOL_CREATE_NORMAL)
 		if err == nil {
 			return &pb.PoolStateResponse{State: pb.PoolState_STORAGE_POOL_RUNNING}, nil
 		}
@@ -75,7 +76,8 @@ func (zpool *Pool) Destroy(ctx context.Context, poolUUID *pb.PoolUUID) (*pb.Pool
 	pool, err := conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
 	if err == nil {
 		defer pool.Free()
-		if err := pool.Destroy(); err == nil {
+		err = pool.Destroy()
+		if err == nil {
 			return &pb.PoolStateResponse{State: pb.PoolState_STORAGE_POOL_INACCESSIBLE}, nil
 		}
 	}
