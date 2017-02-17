@@ -15,6 +15,7 @@ env:
   - GOARCH=amd64
 sudo: false
 before_install:
+  - sh support/travis.sh
   - go get -u github.com/kardianos/govendor
 script:
   - govendor sync
