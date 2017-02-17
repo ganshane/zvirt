@@ -19,5 +19,7 @@ before_install:
 script:
   - govendor sync
   - go test
+  - cd main && go build -o zvirt-agent && cd -
+  - mvn -B deploy  --settings support/settings.xml
 notifications:
   email: false

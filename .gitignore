@@ -2,3 +2,5 @@
 !/vendor/vendor.json
 .idea/*
 *.iml
+target
+main/zvirt-agent
