@@ -51,13 +51,13 @@ type ZvirtDomain struct {
 }
 // DomState implements zvirt_domain.DomState
 func (zd *ZvirtDomain) Domstate(contxt context.Context, request *DomainUUID) (*DomainStateResponse, error){
-	var err error
 	poolConn,err := zd.agent.pool.Acquire()
 	ensure.Nil(zd.agent, err)
 	defer zd.agent.pool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	if dom,err :=conn.LookupDomainByUUIDString(request.GetUuid());err ==nil {
+	dom,err :=conn.LookupDomainByUUIDString(request.GetUuid())
+	if err ==nil {
 		defer dom.Free()
 		if domState, _, err := dom.GetState();err ==nil {
 			response := DomainStateResponse{State: DomainState(domState)}
@@ -67,13 +67,13 @@ func (zd *ZvirtDomain) Domstate(contxt context.Context, request *DomainUUID) (*D
 	return nil, err
 }
 func (zd *ZvirtDomain) Define(ctx context.Context, request *DomainDefineRequest) (*DomainUUID, error){
-	var err error
 	poolConn,err := zd.agent.pool.Acquire()
 	ensure.Nil(zd.agent, err)
 	defer zd.agent.pool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	if dom,err :=conn.DomainDefineXML(request.Xml);err == nil{
+	dom,err :=conn.DomainDefineXML(request.Xml)
+	if err == nil{
 		defer dom.Free()
 		if uuid,err:=dom.GetUUIDString(); err == nil {
 			return &DomainUUID{Uuid:uuid},nil
@@ -82,13 +82,13 @@ func (zd *ZvirtDomain) Define(ctx context.Context, request *DomainDefineRequest)
 	return nil,err
 }
 func (zd *ZvirtDomain) Start(ctx context.Context, request *DomainUUID) (*DomainStateResponse, error){
-	var err error
 	poolConn,err := zd.agent.pool.Acquire()
 	ensure.Nil(zd.agent, err)
 	defer zd.agent.pool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	if dom,err := conn.LookupDomainByUUIDString(request.Uuid);err == nil{
+	dom,err := conn.LookupDomainByUUIDString(request.Uuid)
+	if err == nil{
 		/*
 		//see https://github.com/libvirt/libvirt/blob/master/tools/virsh-domain.c#L4097
 		if id,_ :=dom.GetID();id != -1 {
@@ -103,7 +103,6 @@ func (zd *ZvirtDomain) Start(ctx context.Context, request *DomainUUID) (*DomainS
 	return nil,err
 }
 func (zd *ZvirtDomain) Shutdown(ctx context.Context, request *DomainUUID) (*DomainStateResponse, error){
-	var err error
 
 	poolConn,err := zd.agent.pool.Acquire()
 	ensure.Nil(zd.agent, err)
@@ -111,7 +110,8 @@ func (zd *ZvirtDomain) Shutdown(ctx context.Context, request *DomainUUID) (*Doma
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 
-	if dom,err := conn.LookupDomainByUUIDString(request.Uuid);err == nil{
+	dom,err := conn.LookupDomainByUUIDString(request.Uuid)
+	if err == nil{
 		if err= dom.Shutdown();err == nil{
 			return &DomainStateResponse{State:DomainState_VIR_DOMAIN_SHUTDOWN},nil
 		}
@@ -119,14 +119,13 @@ func (zd *ZvirtDomain) Shutdown(ctx context.Context, request *DomainUUID) (*Doma
 	return nil,err
 }
 func (zd *ZvirtDomain) Destroy(ctx context.Context, request *DomainUUID) (*DomainStateResponse, error){
-	var err error
-
 	poolConn,err := zd.agent.pool.Acquire()
 	ensure.Nil(zd.agent, err)
 	defer zd.agent.pool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	if dom,err := conn.LookupDomainByUUIDString(request.Uuid);err == nil{
+	dom,err := conn.LookupDomainByUUIDString(request.Uuid)
+	if err == nil{
 		if err = dom.Destroy();err == nil {
 			return &DomainStateResponse{State:DomainState_VIR_DOMAIN_NOSTATE}, nil
 		}
