@@ -1,18 +1,19 @@
 package zvirt
 
 import (
-	. "github.com/ganshane/zvirt/protocol"
-	"golang.org/x/net/context"
-	"github.com/facebookgo/ensure"
-	"github.com/libvirt/libvirt-go"
 	"time"
+
+	"github.com/facebookgo/ensure"
+	pb "github.com/ganshane/zvirt/protocol"
+	"github.com/libvirt/libvirt-go"
+	"golang.org/x/net/context"
 )
 
 //only for test
-func (s*ZvirtAgent) buildTestDomain()(*libvirt.Domain) {
-	conn,err := s.pool.Acquire()
+func (s *Agent) buildTestDomain() *libvirt.Domain {
+	conn, err := s.connectionPool.Acquire()
 	ensure.Nil(s, err)
-	defer s.pool.Release(conn)
+	defer s.connectionPool.Release(conn)
 
 	libvirtConn := conn.(*libvirtConnWrapper).conn
 	dom, err := libvirtConn.DomainDefineXML(`<domain type="test">
@@ -27,11 +28,12 @@ func (s*ZvirtAgent) buildTestDomain()(*libvirt.Domain) {
 	}
 	return dom
 }
+
 //only for test
-func (s*ZvirtAgent) buildTransientTestDomain() (*libvirt.Domain) {
-	conn,err := s.pool.Acquire()
+func (s *Agent) buildTransientTestDomain() *libvirt.Domain {
+	conn, err := s.connectionPool.Acquire()
 	ensure.Nil(s, err)
-	defer s.pool.Release(conn)
+	defer s.connectionPool.Release(conn)
 	libvirtConn := conn.(*libvirtConnWrapper).conn
 
 	dom, err := libvirtConn.DomainCreateXML(`<domain type="test">
@@ -46,89 +48,99 @@ func (s*ZvirtAgent) buildTransientTestDomain() (*libvirt.Domain) {
 	}
 	return dom
 }
-type ZvirtDomain struct {
-	agent *ZvirtAgent
+
+//Domain is a node domain manager .
+type Domain struct {
+	agent *Agent
 }
-// DomState implements zvirt_domain.DomState
-func (zd *ZvirtDomain) Domstate(contxt context.Context, request *DomainUUID) (*DomainStateResponse, error){
-	poolConn,err := zd.agent.pool.Acquire()
+
+// Domstate implements zvirt_domain.DomState
+func (zd *Domain) Domstate(contxt context.Context, request *pb.DomainUUID) (*pb.DomainStateResponse, error) {
+	poolConn, err := zd.agent.connectionPool.Acquire()
 	ensure.Nil(zd.agent, err)
-	defer zd.agent.pool.Release(poolConn)
+	defer zd.agent.connectionPool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	dom,err :=conn.LookupDomainByUUIDString(request.GetUuid())
-	if err ==nil {
+	dom, err := conn.LookupDomainByUUIDString(request.GetUuid())
+	if err == nil {
 		defer dom.Free()
-		if domState, _, err := dom.GetState();err ==nil {
-			response := DomainStateResponse{State: DomainState(domState)}
+		if domState, _, err := dom.GetState(); err == nil {
+			response := pb.DomainStateResponse{State: pb.DomainState(domState)}
 			return &response, nil
 		}
 	}
 	return nil, err
 }
-func (zd *ZvirtDomain) Define(ctx context.Context, request *DomainDefineRequest) (*DomainUUID, error){
-	poolConn,err := zd.agent.pool.Acquire()
+
+//Define define (but don't start) a domain from an XML file
+func (zd *Domain) Define(ctx context.Context, request *pb.DomainDefineRequest) (*pb.DomainUUID, error) {
+	poolConn, err := zd.agent.connectionPool.Acquire()
 	ensure.Nil(zd.agent, err)
-	defer zd.agent.pool.Release(poolConn)
+	defer zd.agent.connectionPool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	dom,err :=conn.DomainDefineXML(request.Xml)
-	if err == nil{
+	dom, err := conn.DomainDefineXML(request.Xml)
+	if err == nil {
 		defer dom.Free()
-		if uuid,err:=dom.GetUUIDString(); err == nil {
-			return &DomainUUID{Uuid:uuid},nil
+		if uuid, err := dom.GetUUIDString(); err == nil {
+			return &pb.DomainUUID{Uuid: uuid}, nil
 		}
 	}
-	return nil,err
+	return nil, err
 }
-func (zd *ZvirtDomain) Start(ctx context.Context, request *DomainUUID) (*DomainStateResponse, error){
-	poolConn,err := zd.agent.pool.Acquire()
+
+//Start - start a (previously defined) inactive domain
+func (zd *Domain) Start(ctx context.Context, request *pb.DomainUUID) (*pb.DomainStateResponse, error) {
+	poolConn, err := zd.agent.connectionPool.Acquire()
 	ensure.Nil(zd.agent, err)
-	defer zd.agent.pool.Release(poolConn)
+	defer zd.agent.connectionPool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	dom,err := conn.LookupDomainByUUIDString(request.Uuid)
-	if err == nil{
+	dom, err := conn.LookupDomainByUUIDString(request.Uuid)
+	if err == nil {
 		/*
-		//see https://github.com/libvirt/libvirt/blob/master/tools/virsh-domain.c#L4097
-		if id,_ :=dom.GetID();id != -1 {
-			return nil,errors.New("Domain is already active")
-		}
+			//see https://github.com/libvirt/libvirt/blob/master/tools/virsh-domain.c#L4097
+			if id,_ :=dom.GetID();id != -1 {
+				return nil,errors.New("Domain is already active")
+			}
 		*/
 		flag := libvirt.DOMAIN_NONE
-		if err = dom.CreateWithFlags(flag);err == nil{
-			return &DomainStateResponse{State:DomainState_VIR_DOMAIN_RUNNING},nil
+		if err = dom.CreateWithFlags(flag); err == nil {
+			return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_RUNNING}, nil
 		}
 	}
-	return nil,err
+	return nil, err
 }
-func (zd *ZvirtDomain) Shutdown(ctx context.Context, request *DomainUUID) (*DomainStateResponse, error){
 
-	poolConn,err := zd.agent.pool.Acquire()
+//Shutdown - gracefully shutdown a domain
+func (zd *Domain) Shutdown(ctx context.Context, request *pb.DomainUUID) (*pb.DomainStateResponse, error) {
+
+	poolConn, err := zd.agent.connectionPool.Acquire()
 	ensure.Nil(zd.agent, err)
-	defer zd.agent.pool.Release(poolConn)
+	defer zd.agent.connectionPool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-
-	dom,err := conn.LookupDomainByUUIDString(request.Uuid)
-	if err == nil{
-		if err= dom.Shutdown();err == nil{
-			return &DomainStateResponse{State:DomainState_VIR_DOMAIN_SHUTDOWN},nil
+	dom, err := conn.LookupDomainByUUIDString(request.Uuid)
+	if err == nil {
+		if err = dom.Shutdown(); err == nil {
+			return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_SHUTDOWN}, nil
 		}
 	}
-	return nil,err
+	return nil, err
 }
-func (zd *ZvirtDomain) Destroy(ctx context.Context, request *DomainUUID) (*DomainStateResponse, error){
-	poolConn,err := zd.agent.pool.Acquire()
+
+//Destroy - destroy (stop) a domain
+func (zd *Domain) Destroy(ctx context.Context, request *pb.DomainUUID) (*pb.DomainStateResponse, error) {
+	poolConn, err := zd.agent.connectionPool.Acquire()
 	ensure.Nil(zd.agent, err)
-	defer zd.agent.pool.Release(poolConn)
+	defer zd.agent.connectionPool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	dom,err := conn.LookupDomainByUUIDString(request.Uuid)
-	if err == nil{
-		if err = dom.Destroy();err == nil {
-			return &DomainStateResponse{State:DomainState_VIR_DOMAIN_NOSTATE}, nil
+	dom, err := conn.LookupDomainByUUIDString(request.Uuid)
+	if err == nil {
+		if err = dom.Destroy(); err == nil {
+			return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_NOSTATE}, nil
 		}
 	}
-	return nil,err
+	return nil, err
 }

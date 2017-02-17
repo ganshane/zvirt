@@ -1,22 +1,25 @@
 package zvirt
+
 import (
-	libvirt "github.com/libvirt/libvirt-go"
+	"flag"
 	"io"
-	"github.com/facebookgo/rpool"
-	"time"
 	"log"
-	"os"
-	"syscall"
-	"os/signal"
 	"net"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
+
+	"github.com/facebookgo/ensure"
+	"github.com/facebookgo/rpool"
+	pb "github.com/ganshane/zvirt/protocol"
+	libvirt "github.com/libvirt/libvirt-go"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
-	pb "github.com/ganshane/zvirt/protocol"
-	"flag"
-	"github.com/facebookgo/ensure"
 )
-var(
-	uri = flag.String("uri", "test:///default", "libvirtd connection uri")
+
+var (
+	uri  = flag.String("uri", "test:///default", "libvirtd connection uri")
 	bind = flag.String("bind", ":50051", "zvirt bind string")
 )
 
@@ -24,44 +27,46 @@ var(
 type libvirtConnWrapper struct {
 	conn *libvirt.Connect
 }
-func (conn *libvirtConnWrapper)Close() error  {
-	_, e :=conn.conn.Close()
-	return e;
+
+func (conn *libvirtConnWrapper) Close() error {
+	_, e := conn.conn.Close()
+	return e
 }
 
 //new connection
-func  newConnection() (io.Closer, error) {
+func newConnection() (io.Closer, error) {
 	conn, err := libvirt.NewConnect(*uri)
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-	return &libvirtConnWrapper{conn:conn},nil
+	return &libvirtConnWrapper{conn: conn}, nil
 }
 
-//global ZvirtAgent server
-type ZvirtAgent struct {
-	pool *rpool.Pool            //resource pool
-	listener net.Listener       //network binding
-	rpc *grpc.Server            //rpc server instance
+//Agent global agent server instance
+type Agent struct {
+	connectionPool *rpool.Pool  //resource pool
+	listener       net.Listener //network binding
+	rpc            *grpc.Server //rpc server instance
 
-	//zd domain
-	domain *ZvirtDomain
-	zpool *ZvirtPool
+	domain *Domain //domain
+	pool   *Pool   //storage pool
 }
-//fatal method
-func(s *ZvirtAgent) Fatal(args ...interface{})()  {
+
+//Fatal log fatal message
+func (agent *Agent) Fatal(args ...interface{}) {
 	log.Fatal(args)
 }
+
 //start zvirt agent
-func (agent *ZvirtAgent) initInstance() {
+func (agent *Agent) initInstance() {
 	//create domain service instance
-	domain := &ZvirtDomain{agent:agent}
+	domain := &Domain{agent: agent}
 	agent.domain = domain
 	pb.RegisterZvirtDomainServiceServer(agent.rpc, domain)
 
-	pool := &ZvirtPool{agent:agent}
-	agent.zpool = pool
-	pb.RegisterZvirtPoolServiceServer(agent.rpc,pool)
+	pool := &Pool{agent: agent}
+	agent.pool = pool
+	pb.RegisterZvirtPoolServiceServer(agent.rpc, pool)
 
 	//register grpc service
 	reflection.Register(agent.rpc)
@@ -69,7 +74,9 @@ func (agent *ZvirtAgent) initInstance() {
 	//handle system singal
 	go agent.handleSignal()
 }
-func (agent *ZvirtAgent) Serve(){
+
+//Serve initialize agent instance and start rpc server
+func (agent *Agent) Serve() {
 	agent.initInstance()
 
 	log.Println("starting rpc server....")
@@ -77,52 +84,56 @@ func (agent *ZvirtAgent) Serve(){
 		log.Println("failed to serve: ", err)
 	}
 }
-func (s*ZvirtAgent) handleSignal(){
+
+//handle system singal
+func (agent *Agent) handleSignal() {
 	ch := make(chan os.Signal, 10)
 	signal.Notify(ch, syscall.SIGINT, syscall.SIGTERM, syscall.SIGUSR2)
-	for{
+	for {
 		sig := <-ch
-		log.Println("receive signal ",sig)
+		log.Println("receive signal ", sig)
 		switch sig {
 		case syscall.SIGINT, syscall.SIGTERM:
 			// this ensures a subsequent INT/TERM will trigger standard go behaviour of
 			// terminating.
 			signal.Stop(ch)
-			s.close()
+			agent.close()
 			return
 		case syscall.SIGUSR2:
-		// we only return here if there's an error, otherwise the new process
-		// will send us a TERM when it's ready to trigger the actual shutdown.
+			// we only return here if there's an error, otherwise the new process
+			// will send us a TERM when it's ready to trigger the actual shutdown.
 		}
 	}
 }
+
 //close zvirt agent
-func (s*ZvirtAgent) close() error {
+func (agent *Agent) close() error {
 	log.Println("closing zvirt agent")
 
 	log.Println("closing rpc server")
-	s.rpc.GracefulStop()
+	agent.rpc.GracefulStop()
 
-	if(s.listener != nil) {
+	if agent.listener != nil {
 		log.Println("closing net listener")
-		s.listener.Close()
+		agent.listener.Close()
 	}
 
 	log.Println("closing pool")
-	s.pool.Close()
+	agent.connectionPool.Close()
 
 	log.Println("zvirt agent closed")
 	return nil
 }
-func (agent*ZvirtAgent) executeInConnection(callback func(*libvirt.Connect)(interface{},error))(interface{},error){
-	conn,err := agent.pool.Acquire()
+func (agent *Agent) executeInConnection(callback func(*libvirt.Connect) (interface{}, error)) (interface{}, error) {
+	conn, err := agent.connectionPool.Acquire()
 	ensure.Nil(agent, err)
-	defer agent.pool.Release(conn)
+	defer agent.connectionPool.Release(conn)
 	libvirtConn := conn.(*libvirtConnWrapper).conn
 	return callback(libvirtConn)
 }
-//create new server for zvirt
-func NewServer() *ZvirtAgent {
+
+//NewServer create new server for zvirt
+func NewServer() *Agent {
 	//resource pool
 	p := rpool.Pool{
 		New:           newConnection,
@@ -131,7 +142,7 @@ func NewServer() *ZvirtAgent {
 		IdleTimeout:   time.Hour,
 		ClosePoolSize: 2,
 	}
-	log.Printf("starting zvirt agent for %v@%v ",*uri,*bind)
+	log.Printf("starting zvirt agent for %v@%v ", *uri, *bind)
 	//bind
 	lis, err := net.Listen("tcp", *bind)
 	if err != nil {
@@ -139,10 +150,11 @@ func NewServer() *ZvirtAgent {
 	}
 	//new rpc server
 	s := grpc.NewServer()
-	return &ZvirtAgent{pool:&p,listener:lis,rpc:s}
+	return &Agent{connectionPool: &p, listener: lis, rpc: s}
 }
+
 //only for test
-func newTestInstance() *ZvirtAgent {
+func newTestInstance() *Agent {
 	//resource pool
 	p := rpool.Pool{
 		New:           newConnection,
@@ -153,5 +165,5 @@ func newTestInstance() *ZvirtAgent {
 	}
 	//new rpc server
 	s := grpc.NewServer()
-	return &ZvirtAgent{pool:&p,listener:nil,rpc:s}
+	return &Agent{connectionPool: &p, listener: nil, rpc: s}
 }

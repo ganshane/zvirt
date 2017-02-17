@@ -1,75 +1,83 @@
 package zvirt
 
 import (
-	. "github.com/ganshane/zvirt/protocol"
-	"golang.org/x/net/context"
 	"github.com/facebookgo/ensure"
+	pb "github.com/ganshane/zvirt/protocol"
 	"github.com/libvirt/libvirt-go"
+	"golang.org/x/net/context"
 )
 
-
-type ZvirtPool struct {
-	agent *ZvirtAgent
+//Pool storage pool for libvirt
+type Pool struct {
+	agent *Agent
 }
-func (zd *ZvirtPool) Define(ctx context.Context, request *PoolDefineRequest) (*PoolUUID, error){
-	poolConn,err := zd.agent.pool.Acquire()
-	ensure.Nil(zd.agent, err)
-	defer zd.agent.pool.Release(poolConn)
+
+//Define define an inactive persistent storage pool or modify an existing persistent one from an XML file
+func (zpool *Pool) Define(ctx context.Context, request *pb.PoolDefineRequest) (*pb.PoolUUID, error) {
+	poolConn, err := zpool.agent.connectionPool.Acquire()
+	ensure.Nil(zpool.agent, err)
+	defer zpool.agent.connectionPool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	pool,err :=conn.StoragePoolDefineXML(request.Xml,0)
+	pool, err := conn.StoragePoolDefineXML(request.Xml, 0)
 	if err == nil {
 		defer pool.Free()
 		if uuid, err := pool.GetUUIDString(); err == nil {
-			return &PoolUUID{Uuid:uuid}, nil
+			return &pb.PoolUUID{Uuid: uuid}, nil
 		}
 	}
-	return nil,err
+	return nil, err
 }
-func (zpool *ZvirtPool) Info(ctx context.Context, uuid *PoolUUID) (*PoolStateResponse, error){
-	poolConn,err := zpool.agent.pool.Acquire()
+
+//Info - storage pool information
+func (zpool *Pool) Info(ctx context.Context, uuid *pb.PoolUUID) (*pb.PoolStateResponse, error) {
+	poolConn, err := zpool.agent.connectionPool.Acquire()
 	ensure.Nil(zpool.agent, err)
-	defer zpool.agent.pool.Release(poolConn)
+	defer zpool.agent.connectionPool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	pool,err :=conn.LookupStoragePoolByUUIDString(uuid.Uuid)
-	if err == nil{
+	pool, err := conn.LookupStoragePoolByUUIDString(uuid.Uuid)
+	if err == nil {
 		defer pool.Free()
-		info,err:=pool.GetInfo()
+		info, err := pool.GetInfo()
 		if err == nil {
-			return &PoolStateResponse{State:PoolState(info.State)},nil
+			return &pb.PoolStateResponse{State: pb.PoolState(info.State)}, nil
 		}
 	}
-	return nil,err
+	return nil, err
 }
-func (zpool *ZvirtPool) Start(ctx context.Context, poolUUID *PoolUUID) (*PoolStateResponse, error){
-	poolConn,err := zpool.agent.pool.Acquire()
+
+//Start start a (previously defined) inactive pool
+func (zpool *Pool) Start(ctx context.Context, poolUUID *pb.PoolUUID) (*pb.PoolStateResponse, error) {
+	poolConn, err := zpool.agent.connectionPool.Acquire()
 	ensure.Nil(zpool.agent, err)
-	defer zpool.agent.pool.Release(poolConn)
+	defer zpool.agent.connectionPool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	pool,err :=conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
-	if err == nil{
+	pool, err := conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
+	if err == nil {
 		defer pool.Free()
-		err:=pool.Create(libvirt.STORAGE_POOL_CREATE_NORMAL)
-	  if err == nil {
-			return &PoolStateResponse{State:PoolState_STORAGE_POOL_RUNNING},nil
+		err := pool.Create(libvirt.STORAGE_POOL_CREATE_NORMAL)
+		if err == nil {
+			return &pb.PoolStateResponse{State: pb.PoolState_STORAGE_POOL_RUNNING}, nil
 		}
 	}
-	return nil,err
+	return nil, err
 }
-func (zpool *ZvirtPool) Destroy(ctx context.Context, poolUUID *PoolUUID) (*PoolStateResponse, error){
-	poolConn,err := zpool.agent.pool.Acquire()
+
+//Destroy destroy (stop) a pool
+func (zpool *Pool) Destroy(ctx context.Context, poolUUID *pb.PoolUUID) (*pb.PoolStateResponse, error) {
+	poolConn, err := zpool.agent.connectionPool.Acquire()
 	ensure.Nil(zpool.agent, err)
-	defer zpool.agent.pool.Release(poolConn)
+	defer zpool.agent.connectionPool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	pool,err :=conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
-	if err == nil{
+	pool, err := conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
+	if err == nil {
 		defer pool.Free()
-		if err:=pool.Destroy(); err == nil {
-			return &PoolStateResponse{State:PoolState_STORAGE_POOL_INACCESSIBLE},nil
+		if err := pool.Destroy(); err == nil {
+			return &pb.PoolStateResponse{State: pb.PoolState_STORAGE_POOL_INACCESSIBLE}, nil
 		}
 	}
-	return nil,err
+	return nil, err
 }
