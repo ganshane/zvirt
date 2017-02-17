@@ -12,13 +12,13 @@ type ZvirtPool struct {
 	agent *ZvirtAgent
 }
 func (zd *ZvirtPool) Define(ctx context.Context, request *PoolDefineRequest) (*PoolUUID, error){
-	var err error
 	poolConn,err := zd.agent.pool.Acquire()
 	ensure.Nil(zd.agent, err)
 	defer zd.agent.pool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	if pool,err :=conn.StoragePoolDefineXML(request.Xml,0);err == nil {
+	pool,err :=conn.StoragePoolDefineXML(request.Xml,0)
+	if err == nil {
 		defer pool.Free()
 		if uuid, err := pool.GetUUIDString(); err == nil {
 			return &PoolUUID{Uuid:uuid}, nil
@@ -27,7 +27,6 @@ func (zd *ZvirtPool) Define(ctx context.Context, request *PoolDefineRequest) (*P
 	return nil,err
 }
 func (zpool *ZvirtPool) Info(ctx context.Context, uuid *PoolUUID) (*PoolStateResponse, error){
-	var err error
 	poolConn,err := zpool.agent.pool.Acquire()
 	ensure.Nil(zpool.agent, err)
 	defer zpool.agent.pool.Release(poolConn)
@@ -41,14 +40,14 @@ func (zpool *ZvirtPool) Info(ctx context.Context, uuid *PoolUUID) (*PoolStateRes
 	}
 	return nil,err
 }
-func (zpool *ZvirtPool) Start(ctx context.Context, pool *PoolUUID) (*PoolStateResponse, error){
-	var err error
+func (zpool *ZvirtPool) Start(ctx context.Context, poolUUID *PoolUUID) (*PoolStateResponse, error){
 	poolConn,err := zpool.agent.pool.Acquire()
 	ensure.Nil(zpool.agent, err)
 	defer zpool.agent.pool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	if pool,err :=conn.LookupStoragePoolByUUIDString(pool.Uuid);err == nil{
+	pool,err :=conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
+	if err == nil{
 		defer pool.Free()
 		if err:=pool.Create(libvirt.STORAGE_POOL_CREATE_NORMAL); err == nil {
 			return &PoolStateResponse{State:PoolState_STORAGE_POOL_RUNNING},nil
@@ -56,14 +55,14 @@ func (zpool *ZvirtPool) Start(ctx context.Context, pool *PoolUUID) (*PoolStateRe
 	}
 	return nil,err
 }
-func (zpool *ZvirtPool) Destroy(ctx context.Context, pool *PoolUUID) (*PoolStateResponse, error){
-	var err error
+func (zpool *ZvirtPool) Destroy(ctx context.Context, poolUUID *PoolUUID) (*PoolStateResponse, error){
 	poolConn,err := zpool.agent.pool.Acquire()
 	ensure.Nil(zpool.agent, err)
 	defer zpool.agent.pool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	if pool,err :=conn.LookupStoragePoolByUUIDString(pool.Uuid);err == nil{
+	pool,err :=conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
+	if err == nil{
 		defer pool.Free()
 		if err:=pool.Destroy(); err == nil {
 			return &PoolStateResponse{State:PoolState_STORAGE_POOL_INACCESSIBLE},nil
