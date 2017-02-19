@@ -69,9 +69,9 @@ func (agent *Agent) initInstance() {
 	agent.pool = pool
 	pb.RegisterZvirtPoolServiceServer(agent.rpc, pool)
 
-	volume := &Volume{agent:agent}
+	volume := &Volume{agent: agent}
 	agent.Volume = volume
-	pb.RegisterZvirtVolumeServiceServer(agent.rpc,volume)
+	pb.RegisterZvirtVolumeServiceServer(agent.rpc, volume)
 
 	//register grpc service
 	reflection.Register(agent.rpc)

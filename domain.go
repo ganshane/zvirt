@@ -62,8 +62,8 @@ func (zd *Domain) Domstate(contxt context.Context, request *pb.DomainUUID) (*pb.
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 	dom, err := conn.LookupDomainByUUIDString(request.GetUuid())
-  if err !=nil {
-		return nil,err
+	if err != nil {
+		return nil, err
 	}
 	defer dom.Free()
 	domState, _, err := dom.GetState()
@@ -131,7 +131,7 @@ func (zd *Domain) Shutdown(ctx context.Context, request *pb.DomainUUID) (*pb.Dom
 		return nil, err
 	}
 	defer dom.Free()
-	err = dom.Shutdown();
+	err = dom.Shutdown()
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func (zd *Domain) Destroy(ctx context.Context, request *pb.DomainUUID) (*pb.Doma
 	//dom.Free()
 	err = dom.Destroy()
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_NOSTATE}, nil
 }

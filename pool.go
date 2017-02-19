@@ -26,7 +26,7 @@ func (zpool *Pool) Define(ctx context.Context, request *pb.PoolDefineRequest) (*
 	defer pool.Free()
 	uuid, err := pool.GetUUIDString()
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	return &pb.PoolUUID{Uuid: uuid}, nil
 }
@@ -45,7 +45,7 @@ func (zpool *Pool) Info(ctx context.Context, uuid *pb.PoolUUID) (*pb.PoolStateRe
 	defer pool.Free()
 	info, err := pool.GetInfo()
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
 	return &pb.PoolStateResponse{State: pb.PoolState(info.State)}, nil
 }
