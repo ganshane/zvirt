@@ -4,6 +4,7 @@ import (
 	"github.com/facebookgo/ensure"
 	pb "github.com/ganshane/zvirt/protocol"
 	"testing"
+	"errors"
 )
 
 func TestPool_Define(t *testing.T) {
@@ -28,4 +29,11 @@ func TestPool_Define(t *testing.T) {
 	ensure.Nil(t, err)
 	_, err = zvirt.pool.Destroy(nil, &poolUUID)
 	ensure.Nil(t, err)
+}
+func method(msg *string)(string,error){
+	if msg == nil {
+		return "hello", nil
+	}else {
+		return "hello", errors.New(*msg)
+	}
 }

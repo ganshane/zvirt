@@ -12,30 +12,31 @@ type Volume struct {
 }
 
 //Create create volume
-func (zvolume *Volume) Create(ctx context.Context, request *pb.VolumeDefineRequest) (*pb.VolumeInfo, error){
+func (zvolume *Volume) Create(ctx context.Context, request *pb.VolumeDefineRequest) (*pb.VolumeInfo, error) {
 	poolConn, err := zvolume.agent.connectionPool.Acquire()
 	ensure.Nil(zvolume.agent, err)
 	defer zvolume.agent.connectionPool.Release(poolConn)
 	conn := poolConn.(*libvirtConnWrapper).conn
 
-	//TODO 确认err能否进行传播
 	pool, err := conn.LookupStoragePoolByUUIDString(request.PoolUuid)
-	if err == nil {
-		defer pool.Free()
-		vol,err :=pool.StorageVolCreateXML(request.Xml,0)
-		if err == nil {
-			defer vol.Free()
-			info,err := vol.GetInfo()
-			if(err == nil) {
-				name,_ := vol.GetName()
-				return &pb.VolumeInfo{
-					Name:name,
-					Capacity:info.Capacity,
-					Allocation:info.Allocation,
-				},nil
-			}
-		}
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	defer pool.Free()
+	vol, err := pool.StorageVolCreateXML(request.Xml, 0)
+	if err != nil {
+		return nil, err
+	}
+	defer vol.Free()
+	info, err := vol.GetInfo()
+	if (err != nil) {
+		return nil, err
+	}
+	name, _ := vol.GetName()
+	return &pb.VolumeInfo{
+		Name:name,
+		Capacity:info.Capacity,
+		Allocation:info.Allocation,
+	}, nil
 }
 

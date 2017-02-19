@@ -20,14 +20,15 @@ func (zpool *Pool) Define(ctx context.Context, request *pb.PoolDefineRequest) (*
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 	pool, err := conn.StoragePoolDefineXML(request.Xml, 0)
-	if err == nil {
-		defer pool.Free()
-		uuid, err := pool.GetUUIDString()
-		if err == nil {
-			return &pb.PoolUUID{Uuid: uuid}, nil
-		}
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	defer pool.Free()
+	uuid, err := pool.GetUUIDString()
+	if err != nil {
+		return nil,err
+	}
+	return &pb.PoolUUID{Uuid: uuid}, nil
 }
 
 //Info - storage pool information
@@ -38,14 +39,15 @@ func (zpool *Pool) Info(ctx context.Context, uuid *pb.PoolUUID) (*pb.PoolStateRe
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 	pool, err := conn.LookupStoragePoolByUUIDString(uuid.Uuid)
-	if err == nil {
-		defer pool.Free()
-		info, err := pool.GetInfo()
-		if err == nil {
-			return &pb.PoolStateResponse{State: pb.PoolState(info.State)}, nil
-		}
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	defer pool.Free()
+	info, err := pool.GetInfo()
+	if err != nil {
+		return nil,err
+	}
+	return &pb.PoolStateResponse{State: pb.PoolState(info.State)}, nil
 }
 
 //Start start a (previously defined) inactive pool
@@ -56,14 +58,15 @@ func (zpool *Pool) Start(ctx context.Context, poolUUID *pb.PoolUUID) (*pb.PoolSt
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 	pool, err := conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
-	if err == nil {
-		defer pool.Free()
-		err = pool.Create(libvirt.STORAGE_POOL_CREATE_NORMAL)
-		if err == nil {
-			return &pb.PoolStateResponse{State: pb.PoolState_STORAGE_POOL_RUNNING}, nil
-		}
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	defer pool.Free()
+	err = pool.Create(libvirt.STORAGE_POOL_CREATE_NORMAL)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.PoolStateResponse{State: pb.PoolState_STORAGE_POOL_RUNNING}, nil
 }
 
 //Destroy destroy (stop) a pool
@@ -74,12 +77,13 @@ func (zpool *Pool) Destroy(ctx context.Context, poolUUID *pb.PoolUUID) (*pb.Pool
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 	pool, err := conn.LookupStoragePoolByUUIDString(poolUUID.Uuid)
-	if err == nil {
-		defer pool.Free()
-		err = pool.Destroy()
-		if err == nil {
-			return &pb.PoolStateResponse{State: pb.PoolState_STORAGE_POOL_INACCESSIBLE}, nil
-		}
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	defer pool.Free()
+	err = pool.Destroy()
+	if err != nil {
+		return nil, err
+	}
+	return &pb.PoolStateResponse{State: pb.PoolState_STORAGE_POOL_INACCESSIBLE}, nil
 }

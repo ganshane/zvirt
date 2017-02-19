@@ -62,15 +62,16 @@ func (zd *Domain) Domstate(contxt context.Context, request *pb.DomainUUID) (*pb.
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 	dom, err := conn.LookupDomainByUUIDString(request.GetUuid())
-	if err == nil {
-		defer dom.Free()
-		domState, _, err := dom.GetState()
-		if err == nil {
-			response := pb.DomainStateResponse{State: pb.DomainState(domState)}
-			return &response, nil
-		}
+  if err !=nil {
+		return nil,err
 	}
-	return nil, err
+	defer dom.Free()
+	domState, _, err := dom.GetState()
+	if err != nil {
+		return nil, err
+	}
+	response := pb.DomainStateResponse{State: pb.DomainState(domState)}
+	return &response, nil
 }
 
 //Define define (but don't start) a domain from an XML file
@@ -81,14 +82,15 @@ func (zd *Domain) Define(ctx context.Context, request *pb.DomainDefineRequest) (
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 	dom, err := conn.DomainDefineXML(request.Xml)
-	if err == nil {
-		defer dom.Free()
-		uuid, err := dom.GetUUIDString()
-		if err == nil {
-			return &pb.DomainUUID{Uuid: uuid}, nil
-		}
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	defer dom.Free()
+	uuid, err := dom.GetUUIDString()
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DomainUUID{Uuid: uuid}, nil
 }
 
 //Start - start a (previously defined) inactive domain
@@ -99,21 +101,22 @@ func (zd *Domain) Start(ctx context.Context, request *pb.DomainUUID) (*pb.Domain
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 	dom, err := conn.LookupDomainByUUIDString(request.Uuid)
-	if err == nil {
-		defer dom.Free()
-		/*
-			//see https://github.com/libvirt/libvirt/blob/master/tools/virsh-domain.c#L4097
-			if id,_ :=dom.GetID();id != -1 {
-				return nil,errors.New("Domain is already active")
-			}
-		*/
-		flag := libvirt.DOMAIN_NONE
-		err = dom.CreateWithFlags(flag)
-		if err == nil {
-			return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_RUNNING}, nil
-		}
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	defer dom.Free()
+	/*
+		//see https://github.com/libvirt/libvirt/blob/master/tools/virsh-domain.c#L4097
+		if id,_ :=dom.GetID();id != -1 {
+			return nil,errors.New("Domain is already active")
+		}
+	*/
+	flag := libvirt.DOMAIN_NONE
+	err = dom.CreateWithFlags(flag)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_RUNNING}, nil
 }
 
 //Shutdown - gracefully shutdown a domain
@@ -124,14 +127,15 @@ func (zd *Domain) Shutdown(ctx context.Context, request *pb.DomainUUID) (*pb.Dom
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 	dom, err := conn.LookupDomainByUUIDString(request.Uuid)
-	if err == nil {
-		defer dom.Free()
-		err = dom.Shutdown();
-		if err == nil {
-			return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_SHUTDOWN}, nil
-		}
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	defer dom.Free()
+	err = dom.Shutdown();
+	if err != nil {
+		return nil, err
+	}
+	return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_SHUTDOWN}, nil
 }
 
 //Destroy - destroy (stop) a domain
@@ -142,12 +146,13 @@ func (zd *Domain) Destroy(ctx context.Context, request *pb.DomainUUID) (*pb.Doma
 	conn := poolConn.(*libvirtConnWrapper).conn
 
 	dom, err := conn.LookupDomainByUUIDString(request.Uuid)
-	if err == nil {
-		//dom.Free()
-		err = dom.Destroy()
-		if err == nil {
-			return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_NOSTATE}, nil
-		}
+	if err != nil {
+		return nil, err
 	}
-	return nil, err
+	//dom.Free()
+	err = dom.Destroy()
+	if err != nil {
+		return nil,err
+	}
+	return &pb.DomainStateResponse{State: pb.DomainState_VIR_DOMAIN_NOSTATE}, nil
 }
