@@ -18,6 +18,7 @@ It has these top-level messages:
 	PoolDefineRequest
 	PoolStateResponse
 	VolumeDefineRequest
+	VolumeRequest
 	VolumeInfo
 */
 package protocol
