@@ -50,6 +50,7 @@ type Agent struct {
 
 	domain *Domain //domain
 	pool   *Pool   //storage pool
+	Volume *Volume //volume
 }
 
 //Fatal log fatal message
@@ -67,6 +68,10 @@ func (agent *Agent) initInstance() {
 	pool := &Pool{agent: agent}
 	agent.pool = pool
 	pb.RegisterZvirtPoolServiceServer(agent.rpc, pool)
+
+	volume := &Volume{agent:agent}
+	agent.Volume = volume
+	pb.RegisterZvirtVolumeServiceServer(agent.rpc,volume)
 
 	//register grpc service
 	reflection.Register(agent.rpc)

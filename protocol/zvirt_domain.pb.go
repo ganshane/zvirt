@@ -8,6 +8,7 @@ Package protocol is a generated protocol buffer package.
 It is generated from these files:
 	zvirt_domain.proto
 	zvirt_pool.proto
+	zvirt_volume.proto
 
 It has these top-level messages:
 	DomainUUID
@@ -16,6 +17,8 @@ It has these top-level messages:
 	PoolUUID
 	PoolDefineRequest
 	PoolStateResponse
+	VolumeDefineRequest
+	VolumeInfo
 */
 package protocol
 

@@ -63,6 +63,12 @@
 			"revisionTime": "2017-01-16T17:26:24Z"
 		},
 		{
+			"checksumSHA1": "WKQcpcaucrBLn50uaBeP6qlGMXg=",
+			"path": "github.com/libvirt/libvirt-go-xml",
+			"revision": "c57b1179448633418522ebab60d145e0b5dbd775",
+			"revisionTime": "2017-01-31T23:06:30Z"
+		},
+		{
 			"checksumSHA1": "9jjO5GjLa0XF/nfWihF02RoH4qc=",
 			"path": "golang.org/x/net/context",
 			"revision": "f2499483f923065a842d38eb4c7f1927e6fc6e6d",
